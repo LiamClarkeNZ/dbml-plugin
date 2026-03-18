@@ -7,14 +7,14 @@ IntelliJ Platform plugin providing syntax highlighting and structural validation
 ## Scope (v1)
 
 - Full DBML spec support (tables, columns, enums, refs, indexes, table groups, table partials, named notes, project definition)
-- Lexer-based syntax highlighting with user-configurable color scheme
+- Lexer-based syntax highlighting with a user-configurable colour scheme
 - Parser-based structural validation (error highlighting for malformed DBML)
 - Brace matching and comment toggling
 - **Not in scope:** Navigation, code completion, refactoring, formatting, semantic validation (duplicate names, invalid references)
 
 ## Approach
 
-- **JFlex lexer** for tokenization, wrapped in `FlexAdapter`
+- **JFlex lexer** for tokenisation, wrapped in `FlexAdapter`
 - **Grammar-Kit parser** generating `PsiParser` and PSI element classes from a `.bnf` grammar
 - **dbml-java** (https://github.com/nilswende/dbml-java) used as a reference for token types and grammar rules, but not as a runtime dependency (its lexer/parser are not compatible with IntelliJ's incremental, position-aware infrastructure). The JFlex lexer and Grammar-Kit grammar will differ structurally from dbml-java's hand-written lexer/parser — dbml-java informs _what_ tokens and grammar rules exist, not _how_ they are implemented.
 
