@@ -1,0 +1,6 @@
+Enum job_status {
+  created [note: 'Waiting']
+  running
+  done
+  failure
+}

@@ -9,5 +9,7 @@
     <extensions defaultExtensionNs="com.intellij">
         <fileType implementationClass="nz.co.steelsky.dbmlplugin.DbmlFileType"
                   name="DBML" language="DBML" extensions="dbml" fieldName="INSTANCE"/>
+        <lang.parserDefinition language="DBML"
+                  implementationClass="nz.co.steelsky.dbmlplugin.parser.DbmlParserDefinition"/>
     </extensions>
 </idea-plugin>

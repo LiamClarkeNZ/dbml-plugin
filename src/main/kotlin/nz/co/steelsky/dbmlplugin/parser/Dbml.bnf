@@ -67,15 +67,22 @@
   ]
 }
 
-// Root
-dbmlFile ::= item_*
+// Root — NEWLINE is NOT auto-skipped, so it must appear explicitly in the grammar.
+dbmlFile ::= (item_ | NEWLINE)*
 private item_ ::= (project_definition | table_definition | ref_definition | enum_definition
                    | table_group | table_partial | named_note)
                    {recoverWhile=item_recover_}
-private item_recover_ ::= !(PROJECT | TABLE | REF | ENUM | TABLEGROUP | TABLEPARTIAL | NOTE | <<eof>>)
+private item_recover_ ::= !(PROJECT | TABLE | REF | ENUM | TABLEGROUP | TABLEPARTIAL | NOTE | NEWLINE | <<eof>>)
 
 // === Shared rules ===
+// Many keywords can appear as identifiers (column names, table names, etc.) in DBML.
+// We list every keyword that does NOT introduce a top-level block so the parser accepts
+// them in identifier positions.
 private identifier_ ::= LITERAL | DOUBLE_QUOTED_STRING
+                       | NAME | TYPE | NOTE | DEFAULT | KEY | PK | NULL | NOT
+                       | UNIQUE | INCREMENT | PRIMARY | INDEXES | BTREE | HASH
+                       | DELETE | UPDATE | CASCADE | RESTRICT | SET | NO | ACTION
+                       | HEADERCOLOR | COLOR | AS
 table_name ::= identifier_ (DOT identifier_)?
 private string_literal_ ::= SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING | TRIPLE_QUOTED_STRING
 private nl_ ::= NEWLINE+
@@ -91,9 +98,11 @@ table_definition ::= TABLE table_name table_alias? table_settings? LBRACE table_
 table_alias ::= AS identifier_
 table_settings ::= LBRACK table_setting (COMMA table_setting)* RBRACK {pin=1}
 table_setting ::= HEADERCOLOR COLON COLOR_CODE | NOTE COLON string_literal_
-private table_body ::= (column_definition | table_partial_ref | indexes_definition | table_note | nl_)*
+// Order matters: indexes_definition, table_note, and table_partial_ref must be tried
+// BEFORE column_definition, because identifier_ now matches keywords like NOTE, INDEXES, etc.
+private table_body ::= (indexes_definition | table_note | table_partial_ref | column_definition | nl_)*
 private table_note ::= NOTE note_value
-table_partial_ref ::= TILDE LITERAL
+table_partial_ref ::= TILDE identifier_
 
 // === Column ===
 column_definition ::= identifier_ column_datatype column_settings? {pin=1}
@@ -120,10 +129,9 @@ private ref_inline ::= COLON ref_body
 private ref_braced ::= LBRACE nl_? ref_body nl_? RBRACE
 ref_body ::= ref_column_names relation ref_column_names ref_settings?
 relation ::= LT | GT | MINUS | NE
-// Flattened to avoid table_name greedily consuming the column name DOT.
+// Left-factored to avoid backtracking issues with ordered choice.
 // Supports: table.column, schema.table.column, table.(col1, col2), schema.table.(col1, col2)
-ref_column_names ::= identifier_ DOT identifier_ DOT (ref_columns_part)
-                   | identifier_ DOT (ref_columns_part)
+ref_column_names ::= identifier_ DOT (identifier_ DOT ref_columns_part | ref_columns_part)
 private ref_columns_part ::= identifier_ | LPAREN identifier_ (COMMA identifier_)* RPAREN
 ref_settings ::= LBRACK ref_setting (COMMA ref_setting)* RBRACK {pin=1}
 ref_setting ::= ref_delete_setting | ref_update_setting | ref_color_setting
@@ -144,8 +152,8 @@ indexes_definition ::= INDEXES LBRACE indexes_body RBRACE {pin=1}
 private indexes_body ::= (index_definition | nl_)*
 index_definition ::= (index_composite | index_single) index_settings? {pin=1}
 private index_composite ::= LPAREN index_column (COMMA index_column)* RPAREN
-private index_single ::= LITERAL | EXPRESSION
-index_column ::= LITERAL | EXPRESSION
+private index_single ::= identifier_ | EXPRESSION
+index_column ::= identifier_ | EXPRESSION
 index_settings ::= LBRACK (pk_index_setting | index_setting_list) RBRACK {pin=1}
 private pk_index_setting ::= PK
 private index_setting_list ::= index_setting (COMMA index_setting)*

@@ -1,0 +1,36 @@
+Project my_app {
+  database_type: 'PostgreSQL'
+}
+
+Table users as U {
+  id integer [pk, increment]
+  name varchar(255)
+  email varchar(255) [unique]
+
+  Note: 'Stores user data'
+}
+
+Table posts {
+  id integer [pk, increment]
+  user_id integer [not null]
+  title varchar
+  body text
+
+  indexes {
+    user_id
+    (user_id, title) [unique]
+  }
+}
+
+Ref: posts.user_id > users.id [delete: cascade]
+
+Enum post_status {
+  draft
+  published
+  archived [note: 'No longer visible']
+}
+
+TableGroup blog {
+  users
+  posts
+}
