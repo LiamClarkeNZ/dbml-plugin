@@ -6,3 +6,4 @@
 .qodana
 build
 .worktrees
+src/main/gen

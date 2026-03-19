@@ -1,5 +1,7 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.grammarkit.tasks.GenerateLexerTask
+import org.jetbrains.grammarkit.tasks.GenerateParserTask
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
@@ -9,6 +11,7 @@ plugins {
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
+    alias(libs.plugins.grammarKit) // Grammar-Kit & JFlex code generation
 }
 
 group = providers.gradleProperty("pluginGroup").get()
@@ -17,6 +20,13 @@ version = providers.gradleProperty("pluginVersion").get()
 // Set the JVM language level used to build the project.
 kotlin {
     jvmToolchain(21)
+}
+
+// Add generated source root
+sourceSets {
+    main {
+        java.srcDir("src/main/gen")
+    }
 }
 
 // Configure project's dependencies
@@ -135,6 +145,31 @@ tasks {
     publishPlugin {
         dependsOn(patchChangelog)
     }
+}
+
+// Configure Grammar-Kit lexer and parser generation
+tasks.named<GenerateLexerTask>("generateLexer") {
+    sourceFile.set(file("src/main/kotlin/nz/co/steelsky/dbmlplugin/lexer/Dbml.flex"))
+    targetOutputDir.set(file("src/main/gen/nz/co/steelsky/dbmlplugin/lexer"))
+    purgeOldFiles.set(true)
+    onlyIf { sourceFile.get().asFile.exists() }
+}
+
+tasks.named<GenerateParserTask>("generateParser") {
+    sourceFile.set(file("src/main/kotlin/nz/co/steelsky/dbmlplugin/parser/Dbml.bnf"))
+    targetRootOutputDir.set(file("src/main/gen"))
+    pathToParser.set("nz/co/steelsky/dbmlplugin/parser/DbmlParser.java")
+    pathToPsiRoot.set("nz/co/steelsky/dbmlplugin/psi")
+    purgeOldFiles.set(true)
+    onlyIf { sourceFile.get().asFile.exists() }
+}
+
+tasks.named("compileKotlin") {
+    dependsOn("generateLexer", "generateParser")
+}
+
+tasks.named("compileJava") {
+    dependsOn("generateLexer", "generateParser")
 }
 
 intellijPlatformTesting {
