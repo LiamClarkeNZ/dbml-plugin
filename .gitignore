@@ -7,3 +7,4 @@
 build
 .worktrees
 src/main/gen
+*.hprof
