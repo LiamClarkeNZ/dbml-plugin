@@ -1,0 +1,5 @@
+TableGroup ecommerce [color: #ff0000] {
+  users
+  orders
+  products
+}

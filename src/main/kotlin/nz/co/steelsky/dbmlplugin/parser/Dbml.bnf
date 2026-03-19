@@ -1,0 +1,181 @@
+{
+  parserClass="nz.co.steelsky.dbmlplugin.parser.DbmlParser"
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+  psiClassPrefix="Dbml"
+  psiImplClassSuffix="Impl"
+  psiPackage="nz.co.steelsky.dbmlplugin.psi"
+  psiImplPackage="nz.co.steelsky.dbmlplugin.psi.impl"
+  elementTypeHolderClass="nz.co.steelsky.dbmlplugin.psi.DbmlTypes"
+  elementTypeClass="nz.co.steelsky.dbmlplugin.psi.DbmlElementType"
+  tokenTypeClass="nz.co.steelsky.dbmlplugin.lexer.DbmlTokenType"
+
+  tokens = [
+    PROJECT="PROJECT"
+    TABLE="TABLE"
+    AS="AS"
+    REF="REF"
+    ENUM="ENUM"
+    TABLEGROUP="TABLEGROUP"
+    TABLEPARTIAL="TABLEPARTIAL"
+    HEADERCOLOR="HEADERCOLOR"
+    COLOR="COLOR"
+    NOTE="NOTE"
+    PRIMARY="PRIMARY"
+    KEY="KEY"
+    PK="PK"
+    NULL="NULL"
+    NOT="NOT"
+    UNIQUE="UNIQUE"
+    DEFAULT="DEFAULT"
+    INCREMENT="INCREMENT"
+    INDEXES="INDEXES"
+    BTREE="BTREE"
+    HASH="HASH"
+    TYPE="TYPE"
+    NAME="NAME"
+    DELETE="DELETE"
+    UPDATE="UPDATE"
+    CASCADE="CASCADE"
+    RESTRICT="RESTRICT"
+    SET="SET"
+    NO="NO"
+    ACTION="ACTION"
+    MINUS="MINUS"
+    LT="LT"
+    GT="GT"
+    NE="NE"
+    LPAREN="LPAREN"
+    RPAREN="RPAREN"
+    LBRACK="LBRACK"
+    RBRACK="RBRACK"
+    LBRACE="LBRACE"
+    RBRACE="RBRACE"
+    COLON="COLON"
+    COMMA="COMMA"
+    DOT="DOT"
+    TILDE="TILDE"
+    LITERAL="LITERAL"
+    NUMBER="NUMBER"
+    SINGLE_QUOTED_STRING="SINGLE_QUOTED_STRING"
+    DOUBLE_QUOTED_STRING="DOUBLE_QUOTED_STRING"
+    TRIPLE_QUOTED_STRING="TRIPLE_QUOTED_STRING"
+    EXPRESSION="EXPRESSION"
+    COLOR_CODE="COLOR_CODE"
+    LINE_COMMENT="LINE_COMMENT"
+    BLOCK_COMMENT="BLOCK_COMMENT"
+    NEWLINE="NEWLINE"
+  ]
+}
+
+// Root — NEWLINE is NOT auto-skipped, so it must appear explicitly in the grammar.
+dbmlFile ::= (item_ | NEWLINE)*
+private item_ ::= (project_definition | table_definition | ref_definition | enum_definition
+                   | table_group | table_partial | named_note)
+                   {recoverWhile=item_recover_}
+private item_recover_ ::= !(PROJECT | TABLE | REF | ENUM | TABLEGROUP | TABLEPARTIAL | NOTE | NEWLINE | <<eof>>)
+
+// === Shared rules ===
+// Many keywords can appear as identifiers (column names, table names, etc.) in DBML.
+// We list every keyword that does NOT introduce a top-level block so the parser accepts
+// them in identifier positions.
+private identifier_ ::= LITERAL | DOUBLE_QUOTED_STRING
+                       | NAME | TYPE | NOTE | DEFAULT | KEY | PK | NULL | NOT
+                       | UNIQUE | INCREMENT | PRIMARY | INDEXES | BTREE | HASH
+                       | DELETE | UPDATE | CASCADE | RESTRICT | SET | NO | ACTION
+                       | HEADERCOLOR | COLOR | AS
+table_name ::= identifier_ (DOT identifier_)?
+private string_literal_ ::= SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING | TRIPLE_QUOTED_STRING
+private nl_ ::= NEWLINE+
+
+// === Project ===
+project_definition ::= PROJECT identifier_? LBRACE project_body RBRACE {pin=1}
+private project_body ::= (project_property | project_note | nl_)*
+project_property ::= LITERAL COLON string_literal_ {pin=2}
+private project_note ::= NOTE note_value
+
+// === Table ===
+table_definition ::= TABLE table_name table_alias? table_settings? LBRACE table_body RBRACE {pin=1}
+table_alias ::= AS identifier_
+table_settings ::= LBRACK table_setting (COMMA table_setting)* RBRACK {pin=1}
+table_setting ::= HEADERCOLOR COLON COLOR_CODE | NOTE COLON string_literal_
+// Order matters: indexes_definition, table_note, and table_partial_ref must be tried
+// BEFORE column_definition, because identifier_ now matches keywords like NOTE, INDEXES, etc.
+private table_body ::= (indexes_definition | table_note | table_partial_ref | column_definition | nl_)*
+private table_note ::= NOTE note_value
+table_partial_ref ::= TILDE identifier_
+
+// === Column ===
+column_definition ::= identifier_ column_datatype column_settings? {pin=1}
+column_datatype ::= identifier_ (LPAREN datatype_param (COMMA datatype_param)* RPAREN)?
+private datatype_param ::= LITERAL | NUMBER
+column_settings ::= LBRACK column_setting (COMMA column_setting)* RBRACK {pin=1}
+column_setting ::= not_null_setting | null_setting | primary_key_setting | pk_setting
+                 | unique_setting | increment_setting | default_setting
+                 | column_note_setting | column_inline_ref
+private not_null_setting ::= NOT NULL
+private null_setting ::= NULL
+private primary_key_setting ::= PRIMARY KEY
+private pk_setting ::= PK
+private unique_setting ::= UNIQUE
+private increment_setting ::= INCREMENT
+private default_setting ::= DEFAULT COLON (string_literal_ | EXPRESSION | LITERAL | NUMBER)
+private column_note_setting ::= NOTE COLON string_literal_
+column_inline_ref ::= REF identifier_? COLON relation ref_column_names
+
+// === Ref ===
+ref_definition ::= REF ref_name? (ref_inline | ref_braced) {pin=1}
+ref_name ::= identifier_
+private ref_inline ::= COLON ref_body
+private ref_braced ::= LBRACE nl_? ref_body nl_? RBRACE
+ref_body ::= ref_column_names relation ref_column_names ref_settings?
+relation ::= LT | GT | MINUS | NE
+// Left-factored to avoid backtracking issues with ordered choice.
+// Supports: table.column, schema.table.column, table.(col1, col2), schema.table.(col1, col2)
+ref_column_names ::= identifier_ DOT (identifier_ DOT ref_columns_part | ref_columns_part)
+private ref_columns_part ::= identifier_ | LPAREN identifier_ (COMMA identifier_)* RPAREN
+ref_settings ::= LBRACK ref_setting (COMMA ref_setting)* RBRACK {pin=1}
+ref_setting ::= ref_delete_setting | ref_update_setting | ref_color_setting
+private ref_delete_setting ::= DELETE COLON ref_action
+private ref_update_setting ::= UPDATE COLON ref_action
+private ref_color_setting ::= COLOR COLON COLOR_CODE
+ref_action ::= CASCADE | RESTRICT | SET NULL | SET DEFAULT | NO ACTION
+
+// === Enum ===
+enum_definition ::= ENUM table_name LBRACE enum_body RBRACE {pin=1}
+private enum_body ::= (enum_value | nl_)*
+enum_value ::= identifier_ enum_value_settings? {pin=1}
+enum_value_settings ::= LBRACK enum_value_setting (COMMA enum_value_setting)* RBRACK {pin=1}
+private enum_value_setting ::= NOTE COLON string_literal_
+
+// === Indexes ===
+indexes_definition ::= INDEXES LBRACE indexes_body RBRACE {pin=1}
+private indexes_body ::= (index_definition | nl_)*
+index_definition ::= (index_composite | index_single) index_settings? {pin=1}
+private index_composite ::= LPAREN index_column (COMMA index_column)* RPAREN
+private index_single ::= identifier_ | EXPRESSION
+index_column ::= identifier_ | EXPRESSION
+index_settings ::= LBRACK (pk_index_setting | index_setting_list) RBRACK {pin=1}
+private pk_index_setting ::= PK
+private index_setting_list ::= index_setting (COMMA index_setting)*
+index_setting ::= index_unique_setting | index_name_setting | index_type_setting | index_note_setting
+private index_unique_setting ::= UNIQUE
+private index_name_setting ::= NAME COLON string_literal_
+private index_type_setting ::= TYPE COLON (BTREE | HASH)
+private index_note_setting ::= NOTE COLON string_literal_
+
+// === Table Group ===
+table_group ::= TABLEGROUP identifier_ table_group_settings? LBRACE table_group_body RBRACE {pin=1}
+table_group_settings ::= LBRACK table_group_setting (COMMA table_group_setting)* RBRACK {pin=1}
+table_group_setting ::= COLOR COLON COLOR_CODE | NOTE COLON string_literal_
+private table_group_body ::= (table_group_entry | table_group_note | nl_)*
+table_group_entry ::= table_name
+private table_group_note ::= NOTE note_value
+
+// === Table Partial ===
+table_partial ::= TABLEPARTIAL identifier_ table_settings? LBRACE table_body RBRACE {pin=1}
+
+// === Named Note ===
+named_note ::= NOTE identifier_ LBRACE string_literal_ RBRACE {pin=1}
+
+// === Note (shared) ===
+note_value ::= COLON string_literal_ | LBRACE string_literal_ RBRACE

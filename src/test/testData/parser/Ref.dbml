@@ -1,0 +1,5 @@
+Ref: users.id < posts.user_id
+
+Ref named_ref {
+  users.id < posts.user_id [delete: cascade, update: no action]
+}

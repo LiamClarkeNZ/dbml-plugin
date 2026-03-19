@@ -1,0 +1,11 @@
+Table users {
+  id integer
+  name varchar
+  email varchar
+
+  indexes {
+    id [pk]
+    (name, email) [unique, name: 'name_email_idx']
+    email [type: btree]
+  }
+}

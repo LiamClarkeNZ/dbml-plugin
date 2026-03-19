@@ -1,0 +1,4 @@
+Table users as U [headercolor: #3498db] {
+  id integer [pk]
+  name varchar
+}
