@@ -114,7 +114,7 @@ Grammar-Kit BNF grammar mirroring dbml-java's `ParserImpl` recursive descent str
 ```
 {
   parserClass="nz.co.steelsky.dbmlplugin.parser.DbmlParser"
-  extends="com.intellij.extlanguage.psi.impl.ASTWrapperPsiElement"
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
   psiClassPrefix="Dbml"
   psiImplClassSuffix="Impl"
   psiPackage="nz.co.steelsky.dbmlplugin.psi"
