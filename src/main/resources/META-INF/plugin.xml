@@ -14,5 +14,9 @@
         <lang.syntaxHighlighterFactory language="DBML"
                   implementationClass="nz.co.steelsky.dbmlplugin.highlighting.DbmlSyntaxHighlighterFactory"/>
         <colorSettingsPage implementation="nz.co.steelsky.dbmlplugin.highlighting.DbmlColorSettingsPage"/>
+        <lang.braceMatcher language="DBML"
+                  implementationClass="nz.co.steelsky.dbmlplugin.DbmlBraceMatcher"/>
+        <lang.commenter language="DBML"
+                  implementationClass="nz.co.steelsky.dbmlplugin.DbmlCommenter"/>
     </extensions>
 </idea-plugin>
