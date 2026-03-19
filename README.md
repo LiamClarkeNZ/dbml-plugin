@@ -18,11 +18,14 @@
 - [ ] Configure the [CODECOV_TOKEN](https://docs.codecov.com/docs/quick-start) secret for automated test coverage reports on PRs
 
 <!-- Plugin description -->
-This Fancy IntelliJ Platform Plugin is going to be your implementation of the brilliant ideas that you have.
+DBML (Database Markup Language) language support for JetBrains IDEs.
 
-This specific section is a source for the [plugin.xml](/src/main/resources/META-INF/plugin.xml) file which will be extracted by the [Gradle](/build.gradle.kts) during the build process.
-
-To keep everything working, do not remove `<!-- ... -->` sections. 
+Features:
+- Syntax highlighting for all DBML constructs (tables, columns, enums, refs, indexes, table groups, table partials, named notes, project definitions)
+- Parser-based structural validation with error highlighting for malformed DBML
+- Configurable colour scheme (Settings > Editor > Color Scheme > DBML)
+- Brace matching and auto-close for `{}`, `[]`, `()`
+- Line (`//`) and block (`/* */`) comment toggling via Cmd+/
 <!-- Plugin description end -->
 
 ## Installation

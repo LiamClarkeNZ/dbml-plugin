@@ -16,10 +16,10 @@ IntelliJ Platform plugin for DBML (Database Markup Language) support. Built from
 ./gradlew check
 
 # Run a specific test class
-./gradlew test --tests "nz.co.steelsky.dbmlplugin.MyPluginTest"
+./gradlew test --tests "nz.co.steelsky.dbmlplugin.lexer.DbmlLexerTest"
 
 # Run a specific test method
-./gradlew test --tests "nz.co.steelsky.dbmlplugin.MyPluginTest.testXMLFile"
+./gradlew test --tests "nz.co.steelsky.dbmlplugin.parser.DbmlParserTest.testSimpleTable"
 
 # Verify plugin compatibility
 ./gradlew verifyPlugin
