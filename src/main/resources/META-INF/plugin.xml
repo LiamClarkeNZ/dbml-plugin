@@ -11,5 +11,8 @@
                   name="DBML" language="DBML" extensions="dbml" fieldName="INSTANCE"/>
         <lang.parserDefinition language="DBML"
                   implementationClass="nz.co.steelsky.dbmlplugin.parser.DbmlParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="DBML"
+                  implementationClass="nz.co.steelsky.dbmlplugin.highlighting.DbmlSyntaxHighlighterFactory"/>
+        <colorSettingsPage implementation="nz.co.steelsky.dbmlplugin.highlighting.DbmlColorSettingsPage"/>
     </extensions>
 </idea-plugin>
