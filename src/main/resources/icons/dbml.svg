@@ -1,6 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
-  <ellipse cx="8" cy="4" rx="6" ry="2.5" fill="#6B9BD2" stroke="#4A7AB5" stroke-width="0.8"/>
-  <path d="M2 4v8c0 1.38 2.69 2.5 6 2.5s6-1.12 6-2.5V4" fill="#6B9BD2" stroke="#4A7AB5" stroke-width="0.8"/>
-  <ellipse cx="8" cy="12" rx="6" ry="2.5" fill="none" stroke="#4A7AB5" stroke-width="0.8"/>
-  <path d="M2 8c0 1.38 2.69 2.5 6 2.5s6-1.12 6-2.5" fill="none" stroke="#4A7AB5" stroke-width="0.8"/>
+  <!-- Blue rounded-square background -->
+  <rect x="0" y="0" width="16" height="16" rx="3" ry="3" fill="#1a56db"/>
+  <!-- Database cylinder body -->
+  <rect x="3" y="7" width="10" height="7" rx="1" ry="1" fill="#5b8def"/>
+  <!-- Database cylinder bands -->
+  <rect x="3" y="8" width="10" height="2.5" fill="#9ec1f7"/>
+  <rect x="3" y="11.5" width="10" height="2.5" fill="#6fa3f5"/>
+  <!-- Code brackets </> -->
+  <path d="M5.5 2.5 L3.5 5 L5.5 7.5" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M10.5 2.5 L12.5 5 L10.5 7.5" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="9" y1="2" x2="7" y2="8" stroke="white" stroke-width="1" stroke-linecap="round"/>
 </svg>

@@ -19,3 +19,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+DBML Logo
+
+The DBML logo used in this plugin (pluginIcon.svg, icons/dbml.svg) is derived
+from the official DBML logo by Holistics Software, used with permission
+(https://github.com/holistics/dbml/discussions/845). The original DBML project
+is licensed under the Apache License 2.0
+(https://github.com/holistics/dbml/blob/master/LICENSE).

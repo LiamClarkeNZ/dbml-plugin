@@ -41,6 +41,8 @@ Tables, columns, enums, refs, indexes, table groups, table partials, named notes
 - [Issue tracker](https://github.com/LiamClarkeNZ/dbml-plugin/issues)
 - [DBML documentation](https://dbml.dbdiagram.io/docs/)
 
-## License
+## Licence
 
-[MIT](LICENSE)
+Source code: [MIT](LICENSE)
+
+The DBML logo is used with permission from the [DBML maintainers](https://github.com/holistics/dbml/discussions/845) under the terms of the [Apache 2.0 licence](https://github.com/holistics/dbml/blob/master/LICENSE).
