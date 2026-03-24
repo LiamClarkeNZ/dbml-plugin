@@ -1,55 +1,46 @@
-# dbml-plugin
+# DBML
 
 ![Build](https://github.com/LiamClarkeNZ/dbml-plugin/workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
 
-## Template ToDo list
-- [x] Create a new [IntelliJ Platform Plugin Template][template] project.
-- [ ] Get familiar with the [template documentation][template].
-- [ ] Adjust the [pluginGroup](./gradle.properties) and [pluginName](./gradle.properties), as well as the [id](./src/main/resources/META-INF/plugin.xml) and [sources package](./src/main/kotlin).
-- [ ] Adjust the plugin description in `README` (see [Tips][docs:plugin-description])
-- [ ] Review the [Legal Agreements](https://plugins.jetbrains.com/docs/marketplace/legal-agreements.html?from=IJPluginTemplate).
-- [ ] [Publish a plugin manually](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginTemplate) for the first time.
-- [ ] Set the `MARKETPLACE_ID` in the above README badges. You can obtain it once the plugin is published to JetBrains Marketplace.
-- [ ] Set the [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html?from=IJPluginTemplate) related [secrets](https://github.com/JetBrains/intellij-platform-plugin-template#environment-variables).
-- [ ] Set the [Deployment Token](https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html?from=IJPluginTemplate).
-- [ ] Click the <kbd>Watch</kbd> button on the top of the [IntelliJ Platform Plugin Template][template] to be notified about releases containing new features and fixes.
-- [ ] Configure the [CODECOV_TOKEN](https://docs.codecov.com/docs/quick-start) secret for automated test coverage reports on PRs
-
 <!-- Plugin description -->
-DBML (Database Markup Language) language support for JetBrains IDEs.
+[DBML](https://dbml.dbdiagram.io/) language support for JetBrains IDEs.
 
-Features:
-- Syntax highlighting for all DBML constructs (tables, columns, enums, refs, indexes, table groups, table partials, named notes, project definitions)
-- Parser-based structural validation with error highlighting for malformed DBML
-- Configurable colour scheme (Settings > Editor > Color Scheme > DBML)
-- Brace matching and auto-close for `{}`, `[]`, `()`
-- Line (`//`) and block (`/* */`) comment toggling via Cmd+/
+- Syntax highlighting for keywords, strings, numbers, comments, operators, and expressions
+- Error highlighting for malformed `.dbml` files
+- Configurable colour scheme (Settings | Editor | Color Scheme | DBML)
+- Brace matching for `{}`, `[]`, `()`
+- Line and block comment toggling
 <!-- Plugin description end -->
+
+## Screenshots
+
+### Syntax Highlighting
+
+![Syntax highlighting](screenshots/syntax.png)
+
+### Error Highlighting
+
+![Error highlighting](screenshots/error.png)
 
 ## Installation
 
-- Using the IDE built-in plugin system:
+- <kbd>Settings</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > search for **"DBML"** > <kbd>Install</kbd>
 
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "dbml-plugin"</kbd> >
-  <kbd>Install</kbd>
+- Or download from [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID) and install via
+  <kbd>Settings</kbd> > <kbd>Plugins</kbd> > <kbd>Install plugin from disk...</kbd>
 
-- Using JetBrains Marketplace:
+## Supported Constructs
 
-  Go to [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID) and install it by clicking the <kbd>Install to ...</kbd> button in case your IDE is running.
+Tables, columns, enums, refs, indexes, table groups, table partials, named notes, and project definitions — the full [DBML specification](https://dbml.dbdiagram.io/docs/).
 
-  You can also download the [latest release](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID/versions) from JetBrains Marketplace and install it manually using
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
+## Links
 
-- Manually:
+- [Source code](https://github.com/LiamClarkeNZ/dbml-plugin)
+- [Issue tracker](https://github.com/LiamClarkeNZ/dbml-plugin/issues)
+- [DBML documentation](https://dbml.dbdiagram.io/docs/)
 
-  Download the [latest release](https://github.com/LiamClarkeNZ/dbml-plugin/releases/latest) and install it manually using
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
+## License
 
-
----
-Plugin based on the [IntelliJ Platform Plugin Template][template].
-
-[template]: https://github.com/JetBrains/intellij-platform-plugin-template
-[docs:plugin-description]: https://plugins.jetbrains.com/docs/intellij/plugin-user-experience.html#plugin-description-and-presentation
+[MIT](LICENSE)

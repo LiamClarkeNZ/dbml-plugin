@@ -2,7 +2,7 @@
 <idea-plugin>
     <id>nz.co.steelsky.dbmlplugin</id>
     <name>DBML</name>
-    <vendor>steelsky</vendor>
+    <vendor url="https://github.com/LiamClarkeNZ/dbml-plugin" email="liam@steelsky.co.nz">steelsky</vendor>
 
     <depends>com.intellij.modules.platform</depends>
 
