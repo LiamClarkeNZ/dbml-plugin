@@ -10,7 +10,7 @@
 - Syntax highlighting for keywords, strings, numbers, comments, operators, and expressions
 - Escape sequence highlighting in multi-line strings
 - Colour preview and picker for `headercolor` / `color` hex codes
-- Error highlighting for malformed `.dbml` files
+- Human-friendly error highlighting for malformed `.dbml` files
 - Configurable colour scheme (Settings | Editor | Color Scheme | DBML)
 - Brace matching for `{}`, `[]`, `()`
 - Line and block comment toggling
@@ -18,13 +18,13 @@
 
 ## Screenshots
 
-### Syntax Highlighting
+### Syntax Highlighting and Colour Preview
 
-![Syntax highlighting](screenshots/syntax.png)
+![Syntax highlighting and colour preview](screenshots/highlighting-and-colours.png)
 
 ### Error Highlighting
 
-![Error highlighting](screenshots/error.png)
+![Error highlighting](screenshots/errors.png)
 
 ## Installation
 
