@@ -45,10 +45,10 @@ class DbmlColorProvider : ElementColorProvider {
     private fun parseHex6(hex: String): Color? =
         runCatching { Color(hex.toInt(16)) }.getOrNull()
 
-    private fun parseHex3(hex: String): Color? {
+    private fun parseHex3(hex: String): Color? = runCatching {
         val r = hex[0].toString().repeat(2).toInt(16)
         val g = hex[1].toString().repeat(2).toInt(16)
         val b = hex[2].toString().repeat(2).toInt(16)
-        return Color(r, g, b)
-    }
+        Color(r, g, b)
+    }.getOrNull()
 }
