@@ -9,35 +9,35 @@ class DbmlLexerTest : LexerTestCase() {
     fun testKeywords() {
         doTest(
             "Table Enum Ref Project",
-            """TABLE ('Table')
+            """'Table' ('Table')
 WHITE_SPACE (' ')
-ENUM ('Enum')
+'Enum' ('Enum')
 WHITE_SPACE (' ')
-REF ('Ref')
+'Ref' ('Ref')
 WHITE_SPACE (' ')
-PROJECT ('Project')"""
+'Project' ('Project')"""
         )
     }
 
     fun testOperators() {
         doTest(
             "< > - <>",
-            """LT ('<')
+            """'<' ('<')
 WHITE_SPACE (' ')
-GT ('>')
+'>' ('>')
 WHITE_SPACE (' ')
-MINUS ('-')
+'-' ('-')
 WHITE_SPACE (' ')
-NE ('<>')"""
+'<>' ('<>')"""
         )
     }
 
     fun testNumbers() {
         doTest(
             "42 3.14",
-            """NUMBER ('42')
+            """number ('42')
 WHITE_SPACE (' ')
-NUMBER ('3.14')"""
+number ('3.14')"""
         )
     }
 
@@ -45,7 +45,7 @@ NUMBER ('3.14')"""
         doTest(
             "// line comment\n/* block */",
             """LINE_COMMENT ('// line comment')
-NEWLINE ('\n')
+new line ('\n')
 BLOCK_COMMENT ('/* block */')"""
         )
     }
@@ -53,85 +53,85 @@ BLOCK_COMMENT ('/* block */')"""
     fun testColorCode() {
         doTest(
             "#fff #aabbcc",
-            """COLOR_CODE ('#fff')
+            """colour code ('#fff')
 WHITE_SPACE (' ')
-COLOR_CODE ('#aabbcc')"""
+colour code ('#aabbcc')"""
         )
     }
 
     fun testIdentifiersAndNewlines() {
         doTest(
             "my_table\nmy_column",
-            """LITERAL ('my_table')
-NEWLINE ('\n')
-LITERAL ('my_column')"""
+            """identifier ('my_table')
+new line ('\n')
+identifier ('my_column')"""
         )
     }
 
     fun testTableDefinition() {
         doTest(
             "Table users {\n  id integer [pk]\n}",
-            """TABLE ('Table')
+            """'Table' ('Table')
 WHITE_SPACE (' ')
-LITERAL ('users')
+identifier ('users')
 WHITE_SPACE (' ')
-LBRACE ('{')
-NEWLINE ('\n')
+'{' ('{')
+new line ('\n')
 WHITE_SPACE ('  ')
-LITERAL ('id')
+identifier ('id')
 WHITE_SPACE (' ')
-LITERAL ('integer')
+identifier ('integer')
 WHITE_SPACE (' ')
-LBRACK ('[')
-PK ('pk')
-RBRACK (']')
-NEWLINE ('\n')
-RBRACE ('}')"""
+'[' ('[')
+'pk' ('pk')
+']' (']')
+new line ('\n')
+'}' ('}')"""
         )
     }
 
     fun testSingleQuotedString() {
         doTest(
             "'hello world'",
-            "SINGLE_QUOTED_STRING (''hello world'')"
+            "string (''hello world'')"
         )
     }
 
     fun testDoubleQuotedString() {
         doTest(
             "\"hello world\"",
-            "DOUBLE_QUOTED_STRING ('\"hello world\"')"
+            "quoted identifier ('\"hello world\"')"
         )
     }
 
     fun testTripleQuotedString() {
         doTest(
             "'''multi\nline'''",
-            """TRIPLE_STRING_OPEN (''''')
-TRIPLE_STRING_CONTENT ('multi')
-NEWLINE ('\n')
-TRIPLE_STRING_CONTENT ('line')
-TRIPLE_STRING_CLOSE (''''')"""
+            """''' (''''')
+string content ('multi')
+new line ('\n')
+string content ('line')
+''' (''''')"""
         )
     }
 
     fun testTripleQuotedStringWithEscapes() {
         doTest(
             "'''it\\'s a test\\\\end'''",
-            """TRIPLE_STRING_OPEN (''''')
-TRIPLE_STRING_CONTENT ('it')
-STRING_ESCAPE ('\'')
-TRIPLE_STRING_CONTENT ('s a test')
-STRING_ESCAPE ('\\')
-TRIPLE_STRING_CONTENT ('end')
-TRIPLE_STRING_CLOSE (''''')"""
+            """''' (''''')
+string content ('it')
+escape sequence ('\'')
+string content ('s a test')
+escape sequence ('\\')
+string content ('end')
+''' (''''')"""
         )
     }
 
     fun testExpression() {
         doTest(
             "`now()`",
-            "EXPRESSION ('`now()`')"
+            "expression ('`now()`')"
         )
     }
 }
