@@ -70,9 +70,9 @@ COLOR_CODE_BODY = {HEX_DIGIT}{6} | {HEX_DIGIT}{3}
     "#" {COLOR_CODE_BODY}       { return COLOR_CODE; }
 
     // Strings — triple-quoted MUST come before single-quoted
-    // Opening delimiters do NOT return a token — they just transition state.
-    // The state's closing rule returns the token covering the entire literal.
-    "'''"                       { yybegin(IN_TRIPLE_STRING); }
+    // Triple-quoted strings emit separate tokens for open/content/escape/close
+    // to enable escape sequence highlighting. Other strings remain single-token.
+    "'''"                       { yybegin(IN_TRIPLE_STRING); return TRIPLE_STRING_OPEN; }
     "'"                         { yybegin(IN_SINGLE_STRING); }
     "\""                        { yybegin(IN_DOUBLE_STRING); }
     "`"                         { yybegin(IN_EXPRESSION); }
@@ -148,11 +148,15 @@ COLOR_CODE_BODY = {HEX_DIGIT}{6} | {HEX_DIGIT}{3}
 }
 
 <IN_TRIPLE_STRING> {
-    "\\'''"                     { /* escaped triple quote, continue */ }
-    "\\\\"                      { /* escaped backslash, continue */ }
-    "'''"                       { yybegin(YYINITIAL); return TRIPLE_QUOTED_STRING; }
+    "\\'"                       { return STRING_ESCAPE; }
+    "\\\\"                      { return STRING_ESCAPE; }
+    "'''"                       { yybegin(YYINITIAL); return TRIPLE_STRING_CLOSE; }
+    [\n\r]                      { return NEWLINE; }
+    [^\\'\n\r]+                 { return TRIPLE_STRING_CONTENT; }
+    "'"                         { return TRIPLE_STRING_CONTENT; }
+    "''"                        { return TRIPLE_STRING_CONTENT; }
     <<EOF>>                     { yybegin(YYINITIAL); return BAD_CHARACTER; }
-    [^]                         { /* any char including newlines, continue */ }
+    [^]                         { return TRIPLE_STRING_CONTENT; }
 }
 
 <IN_EXPRESSION> {

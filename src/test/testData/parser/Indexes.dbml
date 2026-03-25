@@ -6,6 +6,7 @@ Table users {
   indexes {
     id [pk]
     (name, email) [unique, name: 'name_email_idx']
+    (name, email) [unique, pk]
     email [type: btree]
   }
 }

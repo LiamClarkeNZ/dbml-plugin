@@ -23,12 +23,18 @@ class DbmlHighlightingTest : BasePlatformTestCase() {
         val stringTokens = listOf(
             DbmlTypes.SINGLE_QUOTED_STRING,
             DbmlTypes.DOUBLE_QUOTED_STRING,
-            DbmlTypes.TRIPLE_QUOTED_STRING,
+            DbmlTypes.TRIPLE_STRING_OPEN,
+            DbmlTypes.TRIPLE_STRING_CLOSE,
+            DbmlTypes.TRIPLE_STRING_CONTENT,
         )
         for (token in stringTokens) {
             val keys = highlighter.getTokenHighlights(token)
             assertTrue("Expected STRING highlighting for $token", keys.contains(DbmlSyntaxHighlighter.STRING))
         }
+    }
+
+    fun testStringEscapeHighlighted() {
+        assertHighlightContains(DbmlTypes.STRING_ESCAPE, DbmlSyntaxHighlighter.STRING_ESCAPE)
     }
 
     fun testCommentHighlighted() {

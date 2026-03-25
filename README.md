@@ -8,6 +8,8 @@
 [DBML](https://dbml.dbdiagram.io/) language support for JetBrains IDEs.
 
 - Syntax highlighting for keywords, strings, numbers, comments, operators, and expressions
+- Escape sequence highlighting in multi-line strings
+- Colour preview and picker for `headercolor` / `color` hex codes
 - Error highlighting for malformed `.dbml` files
 - Configurable colour scheme (Settings | Editor | Color Scheme | DBML)
 - Brace matching for `{}`, `[]`, `()`
@@ -34,6 +36,10 @@
 ## Supported Constructs
 
 Tables, columns, enums, refs, indexes, table groups, table partials, named notes, and project definitions — the full [DBML specification](https://dbml.dbdiagram.io/docs/).
+
+## Known Limitations
+
+- In very large files, clicking a colour swatch immediately after editing may show an error. This is a platform limitation — wait a moment for the highlighting pass to complete and the swatch will work again.
 
 ## Links
 

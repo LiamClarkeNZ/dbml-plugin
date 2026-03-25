@@ -58,7 +58,10 @@
     NUMBER="NUMBER"
     SINGLE_QUOTED_STRING="SINGLE_QUOTED_STRING"
     DOUBLE_QUOTED_STRING="DOUBLE_QUOTED_STRING"
-    TRIPLE_QUOTED_STRING="TRIPLE_QUOTED_STRING"
+    TRIPLE_STRING_OPEN="TRIPLE_STRING_OPEN"
+    TRIPLE_STRING_CLOSE="TRIPLE_STRING_CLOSE"
+    TRIPLE_STRING_CONTENT="TRIPLE_STRING_CONTENT"
+    STRING_ESCAPE="STRING_ESCAPE"
     EXPRESSION="EXPRESSION"
     COLOR_CODE="COLOR_CODE"
     LINE_COMMENT="LINE_COMMENT"
@@ -84,7 +87,8 @@ private identifier_ ::= LITERAL | DOUBLE_QUOTED_STRING
                        | DELETE | UPDATE | CASCADE | RESTRICT | SET | NO | ACTION
                        | HEADERCOLOR | COLOR | AS
 table_name ::= identifier_ (DOT identifier_)?
-private string_literal_ ::= SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING | TRIPLE_QUOTED_STRING
+private string_literal_ ::= SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING | triple_quoted_string
+triple_quoted_string ::= TRIPLE_STRING_OPEN (TRIPLE_STRING_CONTENT | STRING_ESCAPE | NEWLINE)* TRIPLE_STRING_CLOSE {pin=1}
 private nl_ ::= NEWLINE+
 
 // === Project ===
@@ -157,7 +161,9 @@ index_column ::= identifier_ | EXPRESSION
 index_settings ::= LBRACK (pk_index_setting | index_setting_list) RBRACK {pin=1}
 private pk_index_setting ::= PK
 private index_setting_list ::= index_setting (COMMA index_setting)*
-index_setting ::= index_unique_setting | index_name_setting | index_type_setting | index_note_setting
+index_setting ::= index_unique_setting | index_pk_setting | index_primary_key_setting | index_name_setting | index_type_setting | index_note_setting
+private index_pk_setting ::= PK
+private index_primary_key_setting ::= PRIMARY KEY
 private index_unique_setting ::= UNIQUE
 private index_name_setting ::= NAME COLON string_literal_
 private index_type_setting ::= TYPE COLON (BTREE | HASH)

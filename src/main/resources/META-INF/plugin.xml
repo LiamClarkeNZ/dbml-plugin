@@ -18,5 +18,6 @@
                   implementationClass="nz.co.steelsky.dbmlplugin.DbmlBraceMatcher"/>
         <lang.commenter language="DBML"
                   implementationClass="nz.co.steelsky.dbmlplugin.DbmlCommenter"/>
+        <colorProvider implementation="nz.co.steelsky.dbmlplugin.highlighting.DbmlColorProvider"/>
     </extensions>
 </idea-plugin>

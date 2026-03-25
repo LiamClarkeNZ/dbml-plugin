@@ -22,6 +22,7 @@ class DbmlColorSettingsPage : ColorSettingsPage {
             AttributesDescriptor("Brackets", DbmlSyntaxHighlighter.BRACKETS),
             AttributesDescriptor("Parentheses", DbmlSyntaxHighlighter.PARENTHESES),
             AttributesDescriptor("Colour code", DbmlSyntaxHighlighter.COLOR_CODE),
+            AttributesDescriptor("String escape", DbmlSyntaxHighlighter.STRING_ESCAPE),
         )
     }
 
@@ -44,7 +45,10 @@ Table users as U [headercolor: #3498db] {
     (name, email) [unique, name: 'idx_name_email']
   }
 
-  Note: 'Stores user accounts'
+  Note: '''
+    Stores user accounts
+    Escape demo: it\'s working
+  '''
 }
 
 Ref: users.id < posts.user_id [delete: cascade]

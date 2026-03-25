@@ -107,7 +107,24 @@ RBRACE ('}')"""
     fun testTripleQuotedString() {
         doTest(
             "'''multi\nline'''",
-            "TRIPLE_QUOTED_STRING (''''multi\\nline'''')"
+            """TRIPLE_STRING_OPEN (''''')
+TRIPLE_STRING_CONTENT ('multi')
+NEWLINE ('\n')
+TRIPLE_STRING_CONTENT ('line')
+TRIPLE_STRING_CLOSE (''''')"""
+        )
+    }
+
+    fun testTripleQuotedStringWithEscapes() {
+        doTest(
+            "'''it\\'s a test\\\\end'''",
+            """TRIPLE_STRING_OPEN (''''')
+TRIPLE_STRING_CONTENT ('it')
+STRING_ESCAPE ('\'')
+TRIPLE_STRING_CONTENT ('s a test')
+STRING_ESCAPE ('\\')
+TRIPLE_STRING_CONTENT ('end')
+TRIPLE_STRING_CLOSE (''''')"""
         )
     }
 

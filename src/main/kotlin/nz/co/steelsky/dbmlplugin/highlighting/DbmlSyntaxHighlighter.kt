@@ -25,6 +25,7 @@ class DbmlSyntaxHighlighter : SyntaxHighlighterBase() {
         val BRACKETS = createTextAttributesKey("DBML_BRACKETS", DefaultLanguageHighlighterColors.BRACKETS)
         val PARENTHESES = createTextAttributesKey("DBML_PARENTHESES", DefaultLanguageHighlighterColors.PARENTHESES)
         val COLOR_CODE = createTextAttributesKey("DBML_COLOR_CODE", DefaultLanguageHighlighterColors.STRING)
+        val STRING_ESCAPE = createTextAttributesKey("DBML_STRING_ESCAPE", DefaultLanguageHighlighterColors.VALID_STRING_ESCAPE)
         val BAD_CHARACTER = createTextAttributesKey("DBML_BAD_CHARACTER", HighlighterColors.BAD_CHARACTER)
 
         private val KEYWORD_KEYS = arrayOf(KEYWORD)
@@ -38,6 +39,7 @@ class DbmlSyntaxHighlighter : SyntaxHighlighterBase() {
         private val BRACKETS_KEYS = arrayOf(BRACKETS)
         private val PARENTHESES_KEYS = arrayOf(PARENTHESES)
         private val COLOR_CODE_KEYS = arrayOf(COLOR_CODE)
+        private val STRING_ESCAPE_KEYS = arrayOf(STRING_ESCAPE)
         private val BAD_CHARACTER_KEYS = arrayOf(BAD_CHARACTER)
         private val EMPTY_KEYS = emptyArray<TextAttributesKey>()
     }
@@ -53,6 +55,7 @@ class DbmlSyntaxHighlighter : SyntaxHighlighterBase() {
             tokenType == DbmlTypes.LINE_COMMENT -> LINE_COMMENT_KEYS
             tokenType == DbmlTypes.BLOCK_COMMENT -> BLOCK_COMMENT_KEYS
             tokenType == DbmlTypes.COLOR_CODE -> COLOR_CODE_KEYS
+            tokenType == DbmlTypes.STRING_ESCAPE -> STRING_ESCAPE_KEYS
             tokenType == DbmlTypes.LBRACE || tokenType == DbmlTypes.RBRACE -> BRACES_KEYS
             tokenType == DbmlTypes.LBRACK || tokenType == DbmlTypes.RBRACK -> BRACKETS_KEYS
             tokenType == DbmlTypes.LPAREN || tokenType == DbmlTypes.RPAREN -> PARENTHESES_KEYS

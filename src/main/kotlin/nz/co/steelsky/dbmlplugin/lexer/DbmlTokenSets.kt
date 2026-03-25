@@ -11,7 +11,9 @@ object DbmlTokenSets {
     val STRINGS = TokenSet.create(
         DbmlTypes.SINGLE_QUOTED_STRING,
         DbmlTypes.DOUBLE_QUOTED_STRING,
-        DbmlTypes.TRIPLE_QUOTED_STRING,
+        DbmlTypes.TRIPLE_STRING_OPEN,
+        DbmlTypes.TRIPLE_STRING_CLOSE,
+        DbmlTypes.TRIPLE_STRING_CONTENT,
     )
 
     @JvmField
