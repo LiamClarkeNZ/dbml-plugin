@@ -40,6 +40,10 @@ class DbmlParserTest : ParsingTestCase("", "dbml", DbmlParserDefinition()) {
         doTest(true)
     }
 
+    fun testRecords() {
+        doTest(true)
+    }
+
     override fun getTestDataPath(): String = "src/test/testData/parser"
     override fun skipSpaces(): Boolean = false
     override fun includeRanges(): Boolean = true

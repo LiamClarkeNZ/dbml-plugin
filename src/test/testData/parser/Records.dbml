@@ -1,0 +1,35 @@
+// Outside table definition
+Table users {
+  id int [pk]
+  name varchar
+  email varchar
+}
+
+records users(id, name, email) {
+  1, 'Alice', 'alice@example.com'
+  2, 'Bob', 'bob@example.com'
+}
+
+// Inside table definition with explicit column list
+Table posts {
+  id int [pk]
+  title varchar
+  published boolean
+
+  records (id, title, published) {
+    1, 'First Post', true
+    2, 'Second Post', false
+  }
+}
+
+// Inside table definition with implicit column list
+Table comments {
+  id int [pk]
+  user_id int [ref: > users.id]
+  post_id int [ref: > posts.id]
+  title string
+
+  records {
+    1, 2, 1, 'First comment of first post by the second user'
+  }
+}

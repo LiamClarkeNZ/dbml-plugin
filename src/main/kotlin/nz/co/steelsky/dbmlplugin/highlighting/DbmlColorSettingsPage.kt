@@ -45,6 +45,10 @@ Table users as U [headercolor: #3498db] {
     (name, email) [unique, name: 'idx_name_email']
   }
 
+  records (id, name, email) {
+    0, 'user, 'user@example.com'
+  }
+  
   Note: '''
     Stores user accounts
     Escape demo: it\'s working
