@@ -91,6 +91,7 @@ COLOR_CODE_BODY = {HEX_DIGIT}{6} | {HEX_DIGIT}{3}
     [Pp][Rr][Oo][Jj][Ee][Cc][Tt]                                { return PROJECT; }
     [Pp][Rr][Ii][Mm][Aa][Rr][Yy]                                { return PRIMARY; }
     [Ii][Nn][Dd][Ee][Xx][Ee][Ss]                                { return INDEXES; }
+    [Rr][Ee][Cc][Oo][Rr][Dd][Ss]                                { return RECORDS; }
     [Uu][Nn][Ii][Qq][Uu][Ee]                                    { return UNIQUE; }
     [Dd][Ee][Ll][Ee][Tt][Ee]                                    { return DELETE; }
     [Uu][Pp][Dd][Aa][Tt][Ee]                                    { return UPDATE; }
