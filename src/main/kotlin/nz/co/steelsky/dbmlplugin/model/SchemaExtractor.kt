@@ -4,8 +4,11 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.TokenSet
 import com.intellij.psi.util.PsiTreeUtil
 import nz.co.steelsky.dbmlplugin.psi.DbmlColumnDefinition
+import nz.co.steelsky.dbmlplugin.psi.DbmlColumnInlineRef
 import nz.co.steelsky.dbmlplugin.psi.DbmlColumnSetting
 import nz.co.steelsky.dbmlplugin.psi.DbmlNoteValue
+import nz.co.steelsky.dbmlplugin.psi.DbmlRefColumnNames
+import nz.co.steelsky.dbmlplugin.psi.DbmlRefDefinition
 import nz.co.steelsky.dbmlplugin.psi.DbmlTableAlias
 import nz.co.steelsky.dbmlplugin.psi.DbmlTableDefinition
 import nz.co.steelsky.dbmlplugin.psi.DbmlTypes
@@ -25,10 +28,11 @@ object SchemaExtractor {
     fun extract(file: PsiFile): SchemaModel {
         val tables = PsiTreeUtil.getChildrenOfTypeAsList(file, DbmlTableDefinition::class.java)
             .map(::extractTable)
+        val resolver = TableResolver(tables)
         return SchemaModel(
             tables = tables,
             enums = emptyList(),
-            relations = emptyList(),
+            relations = extractRelations(file, resolver),
             groups = emptyList(),
             parseErrorCount = 0,
         )
@@ -51,11 +55,7 @@ object SchemaExtractor {
 
     private fun extractColumn(col: DbmlColumnDefinition): ColumnModel {
         val datatype = col.columnDatatype
-        val name = if (datatype != null) {
-            unquote(col.text.substring(0, datatype.startOffsetInParent).trim())
-        } else {
-            unquote(col.text.trim())
-        }
+        val name = columnName(col)
         var pk = false
         var unique = false
         var notNull = false
@@ -84,6 +84,114 @@ object SchemaExtractor {
             note = note,
             sourceOffset = col.textRange.startOffset,
         )
+    }
+
+    private fun columnName(col: DbmlColumnDefinition): String {
+        val datatype = col.columnDatatype
+        return if (datatype != null) {
+            unquote(col.text.substring(0, datatype.startOffsetInParent).trim())
+        } else {
+            unquote(col.text.trim())
+        }
+    }
+
+    private data class RefEndpoint(val table: String, val columns: List<String>)
+
+    private class TableResolver(tables: List<TableModel>) {
+        private val byKey = HashMap<String, String>()
+
+        init {
+            tables.forEach { t ->
+                byKey[t.key] = t.key
+                byKey[t.key.substringAfterLast('.')] = t.key
+                t.alias?.let { byKey[it.lowercase()] = t.key }
+            }
+        }
+
+        /** Returns the matching table key, or null if the raw name matches no table. */
+        fun resolve(rawTable: String): String? {
+            val n = rawTable.lowercase()
+            return byKey[n] ?: byKey[n.substringAfterLast('.')]
+        }
+    }
+
+    private fun extractRelations(file: PsiFile, resolver: TableResolver): List<RelationModel> = buildList {
+        PsiTreeUtil.findChildrenOfType(file, DbmlRefDefinition::class.java).forEach { refDef ->
+            val body = refDef.refBody ?: return@forEach
+            val ends = body.refColumnNamesList
+            if (ends.size < 2) return@forEach
+            add(
+                makeRelation(
+                    from = parseRef(ends[0]),
+                    to = parseRef(ends[1]),
+                    relText = body.relation.text,
+                    resolver = resolver,
+                    offset = refDef.textRange.startOffset,
+                ),
+            )
+        }
+        PsiTreeUtil.findChildrenOfType(file, DbmlColumnInlineRef::class.java).forEach { inl ->
+            val colDef = PsiTreeUtil.getParentOfType(inl, DbmlColumnDefinition::class.java) ?: return@forEach
+            val tableDef = PsiTreeUtil.getParentOfType(inl, DbmlTableDefinition::class.java) ?: return@forEach
+            add(
+                makeRelation(
+                    from = RefEndpoint(tableDef.tableName?.text ?: "", listOf(columnName(colDef))),
+                    to = parseRef(inl.refColumnNames),
+                    relText = inl.relation.text,
+                    resolver = resolver,
+                    offset = inl.textRange.startOffset,
+                ),
+            )
+        }
+    }
+
+    private fun makeRelation(
+        from: RefEndpoint,
+        to: RefEndpoint,
+        relText: String,
+        resolver: TableResolver,
+        offset: Int,
+    ): RelationModel {
+        val fromKey = resolver.resolve(from.table)
+        val toKey = resolver.resolve(to.table)
+        return RelationModel(
+            fromTable = fromKey ?: normalize(from.table),
+            fromColumns = from.columns,
+            toTable = toKey ?: normalize(to.table),
+            toColumns = to.columns,
+            cardinality = cardinalityOf(relText),
+            resolved = fromKey != null && toKey != null,
+            sourceOffset = offset,
+        )
+    }
+
+    private fun parseRef(rcn: DbmlRefColumnNames): RefEndpoint {
+        val idents = mutableListOf<String>()
+        var parenAt = -1
+        var child = rcn.firstChild
+        while (child != null) {
+            val type = child.node.elementType
+            when {
+                type == DbmlTypes.LPAREN -> parenAt = idents.size
+                IDENTIFIER_TOKENS.contains(type) -> idents.add(unquote(child.text))
+            }
+            child = child.nextSibling
+        }
+        return if (parenAt >= 0) {
+            RefEndpoint(idents.subList(0, parenAt).joinToString("."), idents.subList(parenAt, idents.size).toList())
+        } else {
+            val cols = if (idents.isNotEmpty()) listOf(idents.last()) else emptyList()
+            val table = if (idents.size > 1) idents.subList(0, idents.size - 1).joinToString(".") else ""
+            RefEndpoint(table, cols)
+        }
+    }
+
+    private fun cardinalityOf(rel: String): Cardinality = when (rel.trim()) {
+        "<" -> Cardinality.ONE_TO_MANY
+        ">" -> Cardinality.MANY_TO_ONE
+        "-" -> Cardinality.ONE_TO_ONE
+        "<>" -> Cardinality.MANY_TO_MANY
+        else -> Cardinality.ONE_TO_MANY
     }
 
     private fun aliasName(a: DbmlTableAlias): String =
