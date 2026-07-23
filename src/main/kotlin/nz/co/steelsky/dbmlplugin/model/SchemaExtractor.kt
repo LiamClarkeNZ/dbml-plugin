@@ -1,16 +1,21 @@
 package nz.co.steelsky.dbmlplugin.model
 
+import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.TokenSet
 import com.intellij.psi.util.PsiTreeUtil
 import nz.co.steelsky.dbmlplugin.psi.DbmlColumnDefinition
 import nz.co.steelsky.dbmlplugin.psi.DbmlColumnInlineRef
 import nz.co.steelsky.dbmlplugin.psi.DbmlColumnSetting
+import nz.co.steelsky.dbmlplugin.psi.DbmlEnumDefinition
+import nz.co.steelsky.dbmlplugin.psi.DbmlEnumValue
+import nz.co.steelsky.dbmlplugin.psi.DbmlIndexDefinition
 import nz.co.steelsky.dbmlplugin.psi.DbmlNoteValue
 import nz.co.steelsky.dbmlplugin.psi.DbmlRefColumnNames
 import nz.co.steelsky.dbmlplugin.psi.DbmlRefDefinition
 import nz.co.steelsky.dbmlplugin.psi.DbmlTableAlias
 import nz.co.steelsky.dbmlplugin.psi.DbmlTableDefinition
+import nz.co.steelsky.dbmlplugin.psi.DbmlTableGroup
 import nz.co.steelsky.dbmlplugin.psi.DbmlTypes
 
 object SchemaExtractor {
@@ -31,10 +36,10 @@ object SchemaExtractor {
         val resolver = TableResolver(tables)
         return SchemaModel(
             tables = tables,
-            enums = emptyList(),
+            enums = PsiTreeUtil.getChildrenOfTypeAsList(file, DbmlEnumDefinition::class.java).map(::extractEnum),
             relations = extractRelations(file, resolver),
-            groups = emptyList(),
-            parseErrorCount = 0,
+            groups = PsiTreeUtil.getChildrenOfTypeAsList(file, DbmlTableGroup::class.java).map(::extractGroup),
+            parseErrorCount = PsiTreeUtil.findChildrenOfType(file, PsiErrorElement::class.java).size,
         )
     }
 
@@ -48,7 +53,7 @@ object SchemaExtractor {
             alias = t.tableAlias?.let(::aliasName),
             note = t.noteValueList.firstOrNull()?.let(::noteText),
             columns = columns,
-            indexes = emptyList(),
+            indexes = t.indexesDefinitionList.flatMap { it.indexDefinitionList }.map(::extractIndex),
             sourceOffset = (nameEl ?: t).textRange.startOffset,
         )
     }
@@ -200,6 +205,59 @@ object SchemaExtractor {
 
     private fun noteText(n: DbmlNoteValue): String =
         unquote(n.text.trim().removePrefix(":").trim().removeSurrounding("{", "}").trim())
+
+    private fun extractEnum(e: DbmlEnumDefinition): EnumModel {
+        val nameEl = e.tableName
+        val raw = nameEl?.text ?: ""
+        return EnumModel(
+            key = normalize(raw),
+            name = lastSegment(unquote(raw.trim())),
+            values = e.enumValueList.map(::enumValueName),
+            sourceOffset = (nameEl ?: e).textRange.startOffset,
+        )
+    }
+
+    private fun enumValueName(v: DbmlEnumValue): String {
+        val settings = v.enumValueSettings
+        val raw = if (settings != null) v.text.substring(0, settings.startOffsetInParent) else v.text
+        return unquote(raw.trim())
+    }
+
+    private fun extractGroup(g: DbmlTableGroup): GroupModel = GroupModel(
+        name = groupName(g),
+        tableKeys = g.tableGroupEntryList.map { normalize(it.tableName.text) },
+        sourceOffset = g.textRange.startOffset,
+    )
+
+    private fun groupName(g: DbmlTableGroup): String =
+        g.node.getChildren(IDENTIFIER_TOKENS).firstOrNull()?.let { unquote(it.text) } ?: ""
+
+    private fun extractIndex(idx: DbmlIndexDefinition): IndexModel {
+        val settings = idx.indexSettings
+        val composite = idx.indexColumnList.map { unquote(it.text.trim()) }
+        val columns = if (composite.isNotEmpty()) {
+            composite
+        } else {
+            val raw = if (settings != null) idx.text.substring(0, settings.startOffsetInParent) else idx.text
+            listOf(unquote(raw.trim()))
+        }
+        var pk = false
+        var unique = false
+        var name: String? = null
+        settings?.indexSettingList?.forEach { s ->
+            when {
+                s.node.findChildByType(DbmlTypes.PK) != null -> pk = true
+                s.node.findChildByType(DbmlTypes.PRIMARY) != null && s.node.findChildByType(DbmlTypes.KEY) != null -> pk = true
+                s.node.findChildByType(DbmlTypes.UNIQUE) != null -> unique = true
+                s.node.findChildByType(DbmlTypes.NAME) != null -> name = unquote(s.text.substringAfter(':').trim())
+            }
+        }
+        // Bare `[pk]` is a private rule: no index_setting child, but a direct PK token on the settings node.
+        if (settings != null && settings.indexSettingList.isEmpty() && settings.node.findChildByType(DbmlTypes.PK) != null) {
+            pk = true
+        }
+        return IndexModel(columns = columns, pk = pk, unique = unique, name = name, sourceOffset = idx.textRange.startOffset)
+    }
 
     private fun DbmlColumnSetting.has(type: com.intellij.psi.tree.IElementType): Boolean =
         node.findChildByType(type) != null
