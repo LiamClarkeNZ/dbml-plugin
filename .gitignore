@@ -16,3 +16,6 @@ docs
 webview/node_modules/
 webview/dist/
 webview/*.tsbuildinfo
+
+# Generated webview bundle (built by :buildWebview)
+src/main/resources/webview/

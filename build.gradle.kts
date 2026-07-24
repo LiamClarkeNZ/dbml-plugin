@@ -1,3 +1,4 @@
+import com.github.gradle.node.npm.task.NpmTask
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.grammarkit.tasks.GenerateLexerTask
@@ -12,6 +13,7 @@ plugins {
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
     alias(libs.plugins.grammarKit) // Grammar-Kit & JFlex code generation
+    alias(libs.plugins.node) // Node/npm build for the visualisation webview
 }
 
 group = providers.gradleProperty("pluginGroup").get()
@@ -27,6 +29,39 @@ sourceSets {
     main {
         java.srcDir("src/main/gen")
     }
+}
+
+// Build the Phase 2 visualisation webview and bundle it into plugin resources.
+node {
+    download.set(false) // use Node from PATH (local dev + CI setup-node)
+    nodeProjectDir.set(file("webview"))
+}
+
+val buildWebview by tasks.registering(NpmTask::class) {
+    group = "build"
+    description = "Builds the visualisation webview bundle (webview/dist/index.html)."
+    dependsOn(tasks.named("npmInstall"))
+    args.set(listOf("run", "build"))
+    inputs.dir(file("webview/src"))
+    inputs.file(file("webview/package.json"))
+    inputs.file(file("webview/vite.config.ts"))
+    inputs.file(file("webview/index.html"))
+    outputs.dir(file("webview/dist"))
+}
+
+// Separate Copy task: a plain `copy {}` closure in a doLast captures a Gradle
+// script reference, which the configuration cache disallows. A typed Copy task
+// is configuration-cache safe.
+val bundleWebview by tasks.registering(Copy::class) {
+    group = "build"
+    description = "Copies the built webview into plugin resources."
+    dependsOn(buildWebview)
+    from(file("webview/dist/index.html"))
+    into(layout.projectDirectory.dir("src/main/resources/webview"))
+}
+
+tasks.named<ProcessResources>("processResources") {
+    dependsOn(bundleWebview)
 }
 
 // Configure project's dependencies
