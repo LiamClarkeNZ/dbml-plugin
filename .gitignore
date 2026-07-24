@@ -11,3 +11,7 @@ src/main/gen
 .claude/
 .run
 docs
+
+# Phase 2 webview
+webview/node_modules/
+webview/dist/
