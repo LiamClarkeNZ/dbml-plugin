@@ -41,6 +41,8 @@ repositories {
 
 // Dependencies are managed with Gradle version catalog - read more: https://docs.gradle.org/current/userguide/version_catalogs.html
 dependencies {
+    compileOnly(libs.gson) // provided by the IntelliJ Platform at runtime; not bundled
+    testImplementation(libs.gson)
     testImplementation(libs.junit)
     testImplementation(libs.opentest4j)
 
