@@ -1,0 +1,12 @@
+:root {
+  --dbml-bg: #ffffff;
+  --dbml-fg: #1e1e1e;
+  --dbml-node-bg: #ffffff;
+  --dbml-header-bg: #eef1f5;
+  --dbml-border: #c8ccd4;
+  --dbml-row-hover: #f0f4fa;
+  --dbml-badge-bg: #dbe4f0;
+  --dbml-badge-fg: #26456e;
+  --dbml-edge: #6b7280;
+}
+html, body, #root { height: 100%; margin: 0; background: var(--dbml-bg); }

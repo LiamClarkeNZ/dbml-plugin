@@ -1,0 +1,52 @@
+import { Handle, type NodeProps, Position } from "@xyflow/react";
+import type { Node } from "@xyflow/react";
+import type { TableNodeData } from "../transform";
+import "./nodes.css";
+
+type Props = NodeProps<Node<TableNodeData, "table">>;
+
+export default function TableNode({ data }: Props) {
+  const { table } = data;
+  return (
+    <div className="dbml-node">
+      <div
+        className="dbml-node__header"
+        data-kind="table"
+        data-offset={table.sourceOffset}
+        title={table.note}
+      >
+        {table.name}
+        {table.alias ? <span className="dbml-node__alias"> ({table.alias})</span> : null}
+      </div>
+      {table.columns.map((col) => (
+        <div
+          className="dbml-row"
+          key={col.name}
+          data-kind="column"
+          data-offset={col.sourceOffset}
+          title={col.note}
+        >
+          <Handle type="target" position={Position.Left} id={col.name} />
+          {col.pk ? <span className="dbml-badge">PK</span> : null}
+          {col.unique ? <span className="dbml-badge">U</span> : null}
+          {col.notNull ? <span className="dbml-badge">NN</span> : null}
+          {col.increment ? <span className="dbml-badge">AI</span> : null}
+          <span className="dbml-row__name">{col.name}</span>
+          <span className="dbml-row__type">{col.type}</span>
+          <Handle type="source" position={Position.Right} id={col.name} />
+        </div>
+      ))}
+      {table.indexes.length > 0 ? (
+        <div className="dbml-node__indexes">
+          {table.indexes.map((idx) => (
+            <div className="dbml-index" key={idx.sourceOffset} data-kind="index" data-offset={idx.sourceOffset}>
+              {idx.pk ? <span className="dbml-badge">PK</span> : null}
+              {idx.unique ? <span className="dbml-badge">U</span> : null}
+              <span>{idx.columns.join(", ")}</span>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
