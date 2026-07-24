@@ -1,0 +1,52 @@
+{
+  "tables": [
+    {
+      "key": "users",
+      "name": "users",
+      "alias": "u",
+      "note": "'application users'",
+      "columns": [
+        { "name": "id", "type": "int", "pk": true, "unique": false, "notNull": false, "increment": true, "sourceOffset": 69 },
+        { "name": "email", "type": "varchar", "pk": false, "unique": true, "notNull": true, "increment": false, "sourceOffset": 94 },
+        { "name": "status", "type": "job_status", "pk": false, "unique": false, "notNull": false, "increment": false, "sourceOffset": 129 }
+      ],
+      "indexes": [],
+      "sourceOffset": 54
+    },
+    {
+      "key": "posts",
+      "name": "posts",
+      "columns": [
+        { "name": "id", "type": "int", "pk": true, "unique": false, "notNull": false, "increment": false, "sourceOffset": 194 },
+        { "name": "user_id", "type": "int", "pk": false, "unique": false, "notNull": false, "increment": false, "sourceOffset": 208 },
+        { "name": "title", "type": "varchar", "pk": false, "unique": false, "notNull": true, "increment": false, "sourceOffset": 222 }
+      ],
+      "indexes": [
+        { "columns": ["user_id"], "pk": false, "unique": false, "sourceOffset": 263 },
+        { "columns": ["user_id", "title"], "pk": false, "unique": true, "sourceOffset": 275 }
+      ],
+      "sourceOffset": 184
+    },
+    {
+      "key": "comments",
+      "name": "comments",
+      "columns": [
+        { "name": "id", "type": "int", "pk": true, "unique": false, "notNull": false, "increment": false, "sourceOffset": 327 },
+        { "name": "post_id", "type": "int", "pk": false, "unique": false, "notNull": false, "increment": false, "sourceOffset": 341 }
+      ],
+      "indexes": [],
+      "sourceOffset": 314
+    }
+  ],
+  "enums": [
+    { "key": "job_status", "name": "job_status", "values": ["created", "running", "done"], "sourceOffset": 5 }
+  ],
+  "relations": [
+    { "fromTable": "posts", "fromColumns": ["user_id"], "toTable": "users", "toColumns": ["id"], "cardinality": "MANY_TO_ONE", "resolved": true, "sourceOffset": 374 },
+    { "fromTable": "comments", "fromColumns": ["post_id"], "toTable": "posts", "toColumns": ["id"], "cardinality": "MANY_TO_ONE", "resolved": true, "sourceOffset": 354 }
+  ],
+  "groups": [
+    { "name": "core", "tableKeys": ["users", "posts", "comments"], "sourceOffset": 405 }
+  ],
+  "parseErrorCount": 0
+}
