@@ -23,6 +23,9 @@ import com.intellij.util.Alarm
 import nz.co.steelsky.dbmlplugin.model.SchemaExtractor
 import nz.co.steelsky.dbmlplugin.model.structuralHash
 import nz.co.steelsky.dbmlplugin.model.toJson
+import org.cef.browser.CefBrowser
+import org.cef.browser.CefFrame
+import org.cef.handler.CefLoadHandlerAdapter
 import java.beans.PropertyChangeListener
 import javax.swing.JComponent
 import javax.swing.JLabel
@@ -54,13 +57,27 @@ class DbmlPreviewFileEditor(
                 null
             }
 
-            b.loadHTML(WebviewHtml.load())
-            b.cefBrowser.executeJavaScript(
-                "window.__onNavigate = (p) => { ${navQuery.inject("JSON.stringify(p)")} };" +
-                    "window.addEventListener('dbml-webview-ready', () => { ${readyQuery.inject("'ready'")} });",
-                b.cefBrowser.url,
-                0,
+            // Install the bridge AFTER the page loads. Injecting before loadHTML would
+            // register the hooks on the pre-load document and lose them once our HTML
+            // loads. The ready-flag/event pair wins the race in either order.
+            b.jbCefClient.addLoadHandler(
+                object : CefLoadHandlerAdapter() {
+                    override fun onLoadEnd(cefBrowser: CefBrowser, frame: CefFrame, httpStatusCode: Int) {
+                        if (!frame.isMain) return
+                        cefBrowser.executeJavaScript(
+                            "window.__onNavigate = (p) => { ${navQuery.inject("JSON.stringify(p)")} };" +
+                                "(function(){var f=function(){ ${readyQuery.inject("'ready'")} };" +
+                                "if(window.__dbmlReady){f();}else{" +
+                                "window.addEventListener('dbml-webview-ready',f,{once:true});}})();",
+                            cefBrowser.url,
+                            0,
+                        )
+                    }
+                },
+                b.cefBrowser,
             )
+
+            b.loadHTML(WebviewHtml.load())
 
             document?.addDocumentListener(
                 object : DocumentListener {
@@ -80,27 +97,34 @@ class DbmlPreviewFileEditor(
         }
     }
 
+    /** Re-extracts the schema and pushes it to the webview. Runs on the EDT (PSI reads require it). */
     private fun pushRender() {
         val b = browser ?: return
         val doc = document ?: return
-        val psiManager = PsiDocumentManager.getInstance(project)
-        psiManager.commitDocument(doc)
-        val psiFile = psiManager.getPsiFile(doc) ?: return
-        val model = SchemaExtractor.extract(psiFile)
-        b.cefBrowser.executeJavaScript(
-            RenderBridge.renderCall(model.toJson(), model.structuralHash()),
-            b.cefBrowser.url,
-            0,
-        )
+        ApplicationManager.getApplication().invokeLater {
+            if (project.isDisposed) return@invokeLater
+            val psiManager = PsiDocumentManager.getInstance(project)
+            psiManager.commitDocument(doc)
+            val psiFile = psiManager.getPsiFile(doc) ?: return@invokeLater
+            val model = SchemaExtractor.extract(psiFile)
+            b.cefBrowser.executeJavaScript(
+                RenderBridge.renderCall(model.toJson(), model.structuralHash()),
+                b.cefBrowser.url,
+                0,
+            )
+        }
     }
 
     private fun pushTheme() {
         val b = browser ?: return
-        b.cefBrowser.executeJavaScript(
-            RenderBridge.applyThemeCall(ThemeVars.currentThemeVars()),
-            b.cefBrowser.url,
-            0,
-        )
+        ApplicationManager.getApplication().invokeLater {
+            if (project.isDisposed) return@invokeLater
+            b.cefBrowser.executeJavaScript(
+                RenderBridge.applyThemeCall(ThemeVars.currentThemeVars()),
+                b.cefBrowser.url,
+                0,
+            )
+        }
     }
 
     private fun handleNavigate(payload: String) {
@@ -108,6 +132,7 @@ class DbmlPreviewFileEditor(
             JsonParser.parseString(payload).asJsonObject.get("offset").asInt
         }.getOrNull() ?: return
         ApplicationManager.getApplication().invokeLater {
+            if (project.isDisposed) return@invokeLater
             OpenFileDescriptor(project, file, offset).navigate(true)
         }
     }

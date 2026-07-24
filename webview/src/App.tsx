@@ -36,6 +36,7 @@ declare global {
       kind: "table" | "column" | "enum";
       offset: number;
     }) => void;
+    __dbmlReady?: boolean;
   }
 }
 
@@ -77,46 +78,53 @@ function Diagram() {
       setState((s) => ({ ...s, banner: "Could not render: invalid schema data." }));
       return;
     }
-    const { nodes, edges, danglingCount } = toFlow(schema);
-    const styledEdges = edges.map(applyEdgeStyling);
-    groupsRef.current = schema.groups;
+    try {
+      const { nodes, edges, danglingCount } = toFlow(schema);
+      const styledEdges = edges.map(applyEdgeStyling);
+      groupsRef.current = schema.groups;
 
-    const parts: string[] = [];
-    if (schema.parseErrorCount > 0) parts.push(`${schema.parseErrorCount} parse error(s)`);
-    if (danglingCount > 0) parts.push(`${danglingCount} unresolved relation(s)`);
-    const banner = parts.length ? parts.join(", ") : null;
+      const parts: string[] = [];
+      if (schema.parseErrorCount > 0) parts.push(`${schema.parseErrorCount} parse error(s)`);
+      if (danglingCount > 0) parts.push(`${danglingCount} unresolved relation(s)`);
+      const banner = parts.length ? parts.join(", ") : null;
 
-    if (hash === lastHash.current) {
-      setState((prev) => {
-        const positions = new Map(prev.nodes.map((n) => [n.id, n.position]));
-        const merged = nodes.map((n) => ({
-          ...n,
-          position: positions.get(n.id) ?? n.position,
-        }));
-        return {
-          nodes: merged,
-          edges: styledEdges,
-          hulls: computeHulls(groupsRef.current, merged),
-          banner,
-        };
+      if (hash === lastHash.current) {
+        setState((prev) => {
+          const positions = new Map(prev.nodes.map((n) => [n.id, n.position]));
+          const merged = nodes.map((n) => ({
+            ...n,
+            position: positions.get(n.id) ?? n.position,
+          }));
+          return {
+            nodes: merged,
+            edges: styledEdges,
+            hulls: computeHulls(groupsRef.current, merged),
+            banner,
+          };
+        });
+        return;
+      }
+
+      const positioned = await layout(nodes, styledEdges);
+      lastHash.current = hash;
+      setState({
+        nodes: positioned,
+        edges: styledEdges,
+        hulls: computeHulls(groupsRef.current, positioned),
+        banner,
       });
-      return;
+    } catch (e) {
+      // Surface transform/layout failures instead of leaving a blank canvas.
+      setState((s) => ({ ...s, banner: `Render error: ${String(e)}` }));
     }
-
-    const positioned = await layout(nodes, styledEdges);
-    lastHash.current = hash;
-    setState({
-      nodes: positioned,
-      edges: styledEdges,
-      hulls: computeHulls(groupsRef.current, positioned),
-      banner,
-    });
   }, []);
 
   useEffect(() => {
     window.render = (json, hash) => void doRender(json, hash);
     window.applyTheme = (vars) => applyTheme(vars);
-    // Handshake: tell the host the entrypoints are installed (Phase 3 waits for this).
+    // Handshake: set a flag AND dispatch the event so the host wins either race
+    // (host attaches its listener before or after this effect runs).
+    window.__dbmlReady = true;
     window.dispatchEvent(new Event("dbml-webview-ready"));
     return () => {
       // leave stubs in place; Phase 3 owns lifecycle
