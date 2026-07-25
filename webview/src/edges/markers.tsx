@@ -11,7 +11,7 @@ export function MarkerDefs() {
           markerHeight="12"
           orient="auto-start-reverse"
         >
-          <path d="M6,1 L6,11" stroke="var(--dbml-edge)" strokeWidth="1.5" fill="none" />
+          <path className="dbml-marker" d="M6,1 L6,11" />
         </marker>
         <marker
           id="dbml-many"
@@ -22,12 +22,7 @@ export function MarkerDefs() {
           markerHeight="14"
           orient="auto-start-reverse"
         >
-          <path
-            d="M11,1 L1,6 L11,11"
-            stroke="var(--dbml-edge)"
-            strokeWidth="1.5"
-            fill="none"
-          />
+          <path className="dbml-marker" d="M11,1 L1,6 L11,11" />
         </marker>
       </defs>
     </svg>

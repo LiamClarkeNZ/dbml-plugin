@@ -46,3 +46,17 @@ describe("theme.css", () => {
     }
   });
 });
+
+// var() is only substituted in CSS property values. In an SVG presentation attribute it is invalid,
+// so the property silently falls back to its initial value - stroke: none paints nothing at all.
+// Neither tsc nor jsdom can see this, so it has to be caught as a source-level invariant.
+describe("SVG colours", () => {
+  it("never passes var() to a presentation attribute", () => {
+    const files = srcFiles(".tsx");
+    expect(files.length).toBeGreaterThan(0);
+    for (const file of files) {
+      const offenders = [...read(file).matchAll(/(\w+)="var\(/g)].map((m) => m[1]);
+      expect(offenders, `${file} must use style={{}} or a CSS class instead`).toEqual([]);
+    }
+  });
+});
