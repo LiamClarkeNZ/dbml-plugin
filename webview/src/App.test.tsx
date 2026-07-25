@@ -61,7 +61,7 @@ describe("App render entrypoint", () => {
 
     const row = document.querySelector('[data-kind="column"][data-table="posts"][data-column="user_id"]');
     expect(row).not.toBeNull();
-    (row as HTMLElement).click();
+    fireEvent.click(row as HTMLElement);
 
     await waitFor(() =>
       expect(document.querySelectorAll(".dbml-row--highlight").length).toBeGreaterThan(0),
@@ -72,7 +72,7 @@ describe("App render entrypoint", () => {
     render(<App />);
     window.render(JSON.stringify(sample), "h1");
     await waitFor(() => expect(document.querySelector(".dbml-node")).not.toBeNull());
-    (document.querySelector('[data-kind="column"][data-table="posts"][data-column="user_id"]') as HTMLElement).click();
+    fireEvent.click(document.querySelector('[data-kind="column"][data-table="posts"][data-column="user_id"]') as HTMLElement);
     await waitFor(() => expect(document.querySelectorAll(".dbml-row--highlight").length).toBeGreaterThan(0));
 
     fireEvent.keyDown(window, { key: "Escape" });
