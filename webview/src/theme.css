@@ -8,6 +8,8 @@
   --dbml-badge-bg: #dbe4f0;
   --dbml-badge-fg: #26456e;
   --dbml-edge: #6b7280;
+  --dbml-accent: #26456e;
+  --dbml-font: monospace;
 
   /* React Flow reads each of its own colours as var(--xy-X-props, var(--xy-X, var(--xy-X-default)))
      and never defines the middle tier itself, so defining it here themes the built-in chrome -

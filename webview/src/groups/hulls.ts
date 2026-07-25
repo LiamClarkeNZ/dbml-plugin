@@ -4,16 +4,26 @@ import { tableNodeId } from "../transform";
 
 export interface Hull {
   name: string;
+  colour?: string;
   x: number;
   y: number;
   width: number;
   height: number;
 }
 
+/** Side/bottom padding around a group's member nodes. Shared with layout.ts so the ELK
+ * parent node sizing (`elk.padding`) stays consistent with what the hull actually draws. */
+export const HULL_PAD = 28;
+/** The label chip sits inside the hull, so the top needs a band of its own: enough for the chip
+ * plus clear space, otherwise the chip reads as sitting on top of the first table. Shared with
+ * layout.ts for the same reason as HULL_PAD. */
+export const HULL_PAD_TOP = 48;
+
 export function computeHulls(
   groups: GroupModel[],
   nodes: FlowNode[],
-  pad = 16,
+  pad = HULL_PAD,
+  padTop = HULL_PAD_TOP,
 ): Hull[] {
   const byId = new Map(nodes.map((n) => [n.id, n]));
   const hulls: Hull[] = [];
@@ -38,11 +48,14 @@ export function computeHulls(
     }
     hulls.push({
       name: group.name,
+      colour: group.color,
       x: minX - pad,
-      y: minY - pad,
+      y: minY - padTop,
       width: maxX - minX + pad * 2,
-      height: maxY - minY + pad * 2,
+      height: maxY - minY + padTop + pad,
     });
   }
-  return hulls;
+  // Hulls are translucent and stack in DOM order, so a group whose bounding box encloses another
+  // would paint over it. Largest first puts the enclosing group behind the one it contains.
+  return hulls.sort((a, b) => b.width * b.height - a.width * a.height);
 }

@@ -2,6 +2,7 @@ import type { Edge, Node } from "@xyflow/react";
 import type {
   Cardinality,
   EnumModel,
+  RelationModel,
   SchemaModel,
   TableModel,
 } from "./schema";
@@ -20,6 +21,12 @@ export type FlowNode =
 export interface EdgeData extends Record<string, unknown> {
   cardinality: Cardinality;
   kind: "relation" | "enum";
+  /**
+   * Author colour from a standalone Ref's `color` setting. Guaranteed lower-case `#rrggbb` by
+   * `SchemaExtractor.normaliseColour`, which is why `applyEdgeStyling`, `markerId` and `GroupHulls`
+   * can interpolate it straight into CSS and into an SVG element id without further validation.
+   */
+  colour?: string;
 }
 export type FlowEdge = Edge<EdgeData>;
 
@@ -32,6 +39,12 @@ export interface FlowData {
 export const tableNodeId = (key: string): string => key;
 export const enumNodeId = (key: string): string => `enum:${key}`;
 export const columnHandleId = (columnName: string): string => columnName;
+
+/** Edge id for a relation. Shared with selection.ts so the format cannot drift. */
+export const relationEdgeId = (r: RelationModel): string =>
+  `rel:${r.fromTable}.${columnHandleId(r.fromColumns[0])}->${r.toTable}.${columnHandleId(r.toColumns[0])}`;
+
+export const columnRowId = (tableKey: string, column: string): string => `${tableKey}.${column}`;
 
 export function toFlow(schema: SchemaModel): FlowData {
   const tableKeys = new Set(schema.tables.map((t) => t.key));
@@ -63,12 +76,13 @@ export function toFlow(schema: SchemaModel): FlowData {
     const sourceHandle = columnHandleId(r.fromColumns[0]);
     const targetHandle = columnHandleId(r.toColumns[0]);
     edges.push({
-      id: `rel:${r.fromTable}.${sourceHandle}->${r.toTable}.${targetHandle}`,
+      id: relationEdgeId(r),
       source: r.fromTable,
       sourceHandle,
       target: r.toTable,
       targetHandle,
-      data: { cardinality: r.cardinality, kind: "relation" },
+      type: "stub",
+      data: { cardinality: r.cardinality, kind: "relation", colour: r.color },
     });
   }
 
@@ -80,6 +94,7 @@ export function toFlow(schema: SchemaModel): FlowData {
           source: table.key,
           sourceHandle: columnHandleId(col.name),
           target: enumNodeId(col.type),
+          type: "stub",
           data: { cardinality: "MANY_TO_ONE", kind: "enum" },
         });
       }

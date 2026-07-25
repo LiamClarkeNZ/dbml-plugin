@@ -32,6 +32,7 @@ export interface TableModel {
   columns: ColumnModel[];
   indexes: IndexModel[];
   sourceOffset: number;
+  headerColor?: string;
 }
 
 export interface EnumModel {
@@ -49,12 +50,14 @@ export interface RelationModel {
   cardinality: Cardinality;
   resolved: boolean;
   sourceOffset: number;
+  color?: string;
 }
 
 export interface GroupModel {
   name: string;
   tableKeys: string[];
   sourceOffset: number;
+  color?: string;
 }
 
 export interface SchemaModel {

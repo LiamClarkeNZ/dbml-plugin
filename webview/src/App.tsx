@@ -1,9 +1,11 @@
 import {
   Background,
+  ControlButton,
   Controls,
   MiniMap,
   ReactFlow,
   ReactFlowProvider,
+  useReactFlow,
   ViewportPortal,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -19,13 +21,18 @@ import {
 import "./App.css";
 import "./theme.css";
 import { MarkerDefs } from "./edges/markers";
-import { applyEdgeStyling } from "./edges/cardinality";
+import { applyEdgeStyling, withHighlight } from "./edges/cardinality";
+import { customTokens } from "./edges/markerVariants";
+import StubEdge from "./edges/StubEdge";
 import { GroupHulls } from "./groups/GroupHulls";
 import { computeHulls, type Hull } from "./groups/hulls";
+import { HighlightContext } from "./highlight";
 import { layout } from "./layout";
 import { nodeTypes } from "./nodes";
 import type { SchemaModel } from "./schema";
+import { EMPTY_HIGHLIGHT, type Highlight, highlightFor } from "./selection";
 import { applyTheme } from "./theme";
+import { Tooltip, useTooltip } from "./tooltip";
 import { type FlowEdge, type FlowNode, toFlow } from "./transform";
 
 declare global {
@@ -39,6 +46,21 @@ declare global {
     __dbmlReady?: boolean;
   }
 }
+
+const edgeTypes = { stub: StubEdge };
+
+/*
+ * Scroll pans and pinch zooms, following the IDE's own diagram editors.
+ *
+ * Wheel zoom is off deliberately. For an offscreen browser the IDE multiplies each wheel rotation by
+ * `ide.browser.jcef.osr.wheelRotation.factor` (default 10), so every event in a trackpad's momentum
+ * tail arrived amplified and the zoom kept stepping long after the gesture ended. Panning absorbs
+ * momentum naturally, which is why it is the better home for the raw wheel.
+ *
+ * PAN_ON_SCROLL_SPEED divides that same multiplier back out: React Flow's own default is 0.5, tuned
+ * for unamplified deltas. Tune this one constant if panning feels wrong.
+ */
+const PAN_ON_SCROLL_SPEED = 0.05;
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -69,6 +91,9 @@ function Diagram() {
   });
   const lastHash = useRef<string | null>(null);
   const groupsRef = useRef<SchemaModel["groups"]>([]);
+  const schemaRef = useRef<SchemaModel | null>(null);
+  const [highlight, setHighlight] = useState<Highlight>(EMPTY_HIGHLIGHT);
+  const [showMiniMap, setShowMiniMap] = useState(true);
 
   const doRender = useCallback(async (json: string, hash: string) => {
     let schema: SchemaModel;
@@ -82,6 +107,7 @@ function Diagram() {
       const { nodes, edges, danglingCount } = toFlow(schema);
       const styledEdges = edges.map(applyEdgeStyling);
       groupsRef.current = schema.groups;
+      schemaRef.current = schema;
 
       const parts: string[] = [];
       if (schema.parseErrorCount > 0) parts.push(`${schema.parseErrorCount} parse error(s)`);
@@ -105,7 +131,7 @@ function Diagram() {
         return;
       }
 
-      const positioned = await layout(nodes, styledEdges);
+      const positioned = await layout(nodes, styledEdges, schema.groups);
       lastHash.current = hash;
       setState({
         nodes: positioned,
@@ -133,31 +159,126 @@ function Diagram() {
 
   const onPaneClickCapture = useCallback((e: ReactMouseEvent) => {
     const el = (e.target as HTMLElement).closest("[data-kind]") as HTMLElement | null;
-    if (!el || !window.__onNavigate) return;
+    if (!el) return;
     const kind = el.getAttribute("data-kind") as "table" | "column" | "enum";
     const offset = Number(el.getAttribute("data-offset"));
-    if (Number.isFinite(offset)) window.__onNavigate({ kind, offset });
+    if (Number.isFinite(offset) && window.__onNavigate) window.__onNavigate({ kind, offset });
+
+    const table = el.getAttribute("data-table");
+    const column = el.getAttribute("data-column");
+    const schema = schemaRef.current;
+    if (kind === "column" && table && column && schema) {
+      setHighlight(highlightFor(schema, { kind: "column", table, column }));
+    }
   }, []);
 
+  // Typed on the id alone: ReactFlow infers its onEdgeClick parameter from the edges prop, and
+  // narrowing to FlowEdge here can trip variance. Only the id is needed.
+  const onEdgeClick = useCallback((_: ReactMouseEvent, edge: { id: string }) => {
+    const schema = schemaRef.current;
+    if (schema) setHighlight(highlightFor(schema, { kind: "edge", id: edge.id }));
+  }, []);
+
+  const clearHighlight = useCallback(() => setHighlight(EMPTY_HIGHLIGHT), []);
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setHighlight(EMPTY_HIGHLIGHT);
+        return;
+      }
+      // Zoom is deliberately keyboard- and button-only; see PAN_ON_SCROLL_SPEED above for why no
+      // gesture drives it.
+      if (!e.metaKey && !e.ctrlKey) return;
+      if (e.key === "=" || e.key === "+") {
+        e.preventDefault();
+        zoomIn();
+      } else if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        zoomOut();
+      } else if (e.key === "0") {
+        e.preventDefault();
+        fitView();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [zoomIn, zoomOut, fitView]);
+
+  // React Flow's own control buttons label themselves with native title attributes, which never
+  // render in JCEF's offscreen browser, leaving the whole bar unlabelled in the IDE. Mirror them
+  // onto data-tip so the DOM tooltip covers them too.
+  useEffect(() => {
+    for (const button of document.querySelectorAll<HTMLElement>(
+      ".react-flow__controls-button[title]",
+    )) {
+      button.dataset.tip = button.title;
+    }
+  }, []);
+
+  const {
+    tip,
+    onMouseOver: onTipMouseOver,
+    onMouseOut: onTipMouseOut,
+  } = useTooltip();
+
+  const edges = state.edges.map((e) => (highlight.edges.has(e.id) ? withHighlight(e) : e));
+
   return (
-    <div className="dbml-app" onClickCapture={onPaneClickCapture}>
-      {state.banner ? <div className="dbml-banner">{state.banner}</div> : null}
-      <MarkerDefs />
-      <ReactFlow
-        nodes={state.nodes}
-        edges={state.edges}
-        nodeTypes={nodeTypes}
-        fitView
-        proOptions={{ hideAttribution: true }}
+    <HighlightContext.Provider value={highlight}>
+      <div
+        className="dbml-app"
+        onClickCapture={onPaneClickCapture}
+        onMouseOver={onTipMouseOver}
+        onMouseOut={onTipMouseOut}
       >
-        <Background />
-        <Controls />
-        <MiniMap pannable zoomable />
-        <ViewportPortal>
-          <GroupHulls hulls={state.hulls} />
-        </ViewportPortal>
-      </ReactFlow>
-    </div>
+        {state.banner ? <div className="dbml-banner">{state.banner}</div> : null}
+        <Tooltip tip={tip} />
+        <MarkerDefs tokens={customTokens(state.edges)} />
+        <ReactFlow
+          nodes={state.nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
+          onEdgeClick={onEdgeClick}
+          onPaneClick={clearHighlight}
+          zoomOnScroll={false}
+          panOnScroll
+          panOnScrollSpeed={PAN_ON_SCROLL_SPEED}
+          zoomOnPinch={false}
+          fitView
+          proOptions={{ hideAttribution: true }}
+        >
+          <Background />
+          <Controls>
+            <ControlButton
+              onClick={() => setShowMiniMap((shown) => !shown)}
+              data-tip={showMiniMap ? "Hide the minimap" : "Show the minimap"}
+              aria-label={showMiniMap ? "Hide the minimap" : "Show the minimap"}
+            >
+              <svg viewBox="0 0 12 12" aria-hidden="true">
+                <rect
+                  x="1"
+                  y="1"
+                  width="10"
+                  height="10"
+                  rx="1"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.2"
+                />
+                <rect x="6.5" y="6.5" width="4" height="4" fill="currentColor" />
+              </svg>
+            </ControlButton>
+          </Controls>
+          {showMiniMap ? <MiniMap pannable zoomable /> : null}
+          <ViewportPortal>
+            <GroupHulls hulls={state.hulls} />
+          </ViewportPortal>
+        </ReactFlow>
+      </div>
+    </HighlightContext.Provider>
   );
 }
 

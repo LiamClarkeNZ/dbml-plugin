@@ -24,6 +24,18 @@ describe("toFlow", () => {
     expect(rel!.data!.cardinality).toBe("MANY_TO_ONE");
   });
 
+  it("uses the stub edge type for relation edges", () => {
+    const { edges } = toFlow(sample as SchemaModel);
+    const rel = edges.find((e) => e.id.startsWith("rel:"));
+    expect(rel!.type).toBe("stub");
+  });
+
+  it("carries a coloured relation's author colour as edge data", () => {
+    const { edges } = toFlow(sample as SchemaModel);
+    const rel = edges.find((e) => e.id.startsWith("rel:"));
+    expect(rel!.data!.colour).toBe("#5b7fbd");
+  });
+
   it("links enum-typed columns to their enum node", () => {
     const { edges } = toFlow(sample as SchemaModel);
     const enumEdge = edges.find((e) => e.data!.kind === "enum");
@@ -31,6 +43,12 @@ describe("toFlow", () => {
     expect(enumEdge!.source).toBe("users");
     expect(enumEdge!.sourceHandle).toBe("status");
     expect(enumEdge!.target).toBe("enum:job_status");
+  });
+
+  it("uses the stub edge type for enum-reference edges too", () => {
+    const { edges } = toFlow(sample as SchemaModel);
+    const enumEdge = edges.find((e) => e.data!.kind === "enum");
+    expect(enumEdge!.type).toBe("stub");
   });
 
   it("drops dangling relations and counts them", () => {

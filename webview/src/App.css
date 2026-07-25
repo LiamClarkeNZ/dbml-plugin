@@ -14,4 +14,23 @@
 .dbml-fallback { padding: 16px; color: var(--dbml-fg); font-family: sans-serif; }
 /* Cardinality markers must be styled here, not with stroke/fill attributes: var() is only valid
    in CSS property values, so a presentation attribute leaves stroke at its initial "none". */
-.dbml-marker { stroke: var(--dbml-edge); stroke-width: 1.5; fill: none; }
+.dbml-marker { stroke-width: 1.5; fill: none; }
+.dbml-marker--default { stroke: var(--dbml-edge); }
+.dbml-marker--highlight { stroke: var(--dbml-accent); }
+/* Fixed positioning keeps the tooltip clear of the node's overflow clipping and unaffected by the
+   canvas transform; the translate lifts it above the element it describes. */
+.dbml-tooltip {
+  position: fixed;
+  transform: translate(-50%, calc(-100% - 6px));
+  z-index: 20;
+  pointer-events: none;
+  max-width: 320px;
+  background: var(--dbml-header-bg);
+  color: var(--dbml-fg);
+  border: 1px solid var(--dbml-border);
+  border-radius: 4px;
+  padding: 3px 7px;
+  font-size: 11px;
+  font-family: var(--dbml-font, sans-serif);
+  white-space: pre-wrap;
+}

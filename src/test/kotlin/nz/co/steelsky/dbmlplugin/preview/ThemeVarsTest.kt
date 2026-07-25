@@ -8,15 +8,42 @@ class ThemeVarsTest : BasePlatformTestCase() {
 
     fun testProducesEveryDocumentedVariableAsHex() {
         val vars = ThemeVars.currentThemeVars()
-        val expected = setOf(
+        val colourKeys = setOf(
             "--dbml-bg", "--dbml-fg", "--dbml-node-bg", "--dbml-header-bg",
             "--dbml-border", "--dbml-row-hover", "--dbml-badge-bg", "--dbml-badge-fg", "--dbml-edge",
+            "--dbml-accent",
         )
-        assertEquals(expected, vars.keys)
+        assertEquals(colourKeys + "--dbml-font", vars.keys)
         val hex = Regex("^#[0-9a-f]{6}$")
-        vars.forEach { (name, value) ->
-            assertTrue("$name should be #rrggbb but was $value", hex.matches(value))
+        colourKeys.forEach { name ->
+            assertTrue("$name should be #rrggbb but was ${vars[name]}", hex.matches(vars.getValue(name)))
         }
+    }
+
+    fun testAccentIsReadableAgainstTheCanvas() {
+        val vars = ThemeVars.currentThemeVars()
+        val accent = vars.getValue("--dbml-accent")
+        assertTrue("accent should be #rrggbb but was $accent", Regex("^#[0-9a-f]{6}$").matches(accent))
+        val ratio = contrast(
+            ColorUtil.getLuminance(Color(Integer.parseInt(accent.removePrefix("#"), 16))),
+            ColorUtil.getLuminance(Color(Integer.parseInt(vars.getValue("--dbml-bg").removePrefix("#"), 16))),
+        )
+        assertTrue("accent only reaches %.1f:1 against the canvas".format(ratio), ratio >= 2.0)
+    }
+
+    fun testFontStackQuotesTheFamilyAndKeepsAFallback() {
+        assertEquals("'JetBrains Mono', monospace", fontStack("JetBrains Mono"))
+    }
+
+    fun testFontStackStripsCharactersThatWouldBreakTheCssValue() {
+        assertEquals("'Menlo', monospace", fontStack("Men'lo\";"))
+    }
+
+    fun testCurrentThemeVarsCarriesTheEditorFont() {
+        val vars = ThemeVars.currentThemeVars()
+        val font = vars["--dbml-font"]
+        assertNotNull(font)
+        assertTrue("font stack should end in a generic fallback but was $font", font!!.endsWith("monospace"))
     }
 
     fun testHexFormatsColour() {

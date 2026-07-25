@@ -38,4 +38,19 @@ class SchemaJsonTest : BasePlatformTestCase() {
         val idColumn = tables[0].asJsonObject.getAsJsonArray("columns")[0].asJsonObject
         assertFalse(idColumn.has("default"))
     }
+
+    fun testOmitsUnsetColoursAndEmitsSetOnes() {
+        val json = SchemaModel(
+            tables = listOf(
+                TableModel("users", "users", null, null, emptyList(), emptyList(), 0),
+                TableModel("orders", "orders", null, null, emptyList(), emptyList(), 0, headerColor = "#b19888"),
+            ),
+            enums = emptyList(),
+            relations = emptyList(),
+            groups = emptyList(),
+            parseErrorCount = 0,
+        ).toJson()
+        assertTrue(json.contains("\"headerColor\":\"#b19888\""))
+        assertEquals(1, Regex("headerColor").findAll(json).count())
+    }
 }

@@ -1,16 +1,17 @@
 import { describe, expect, it } from "vitest";
 import type { FlowEdge } from "../transform";
-import { applyEdgeStyling, edgeMarkers, MARKER_IDS } from "./cardinality";
+import { applyEdgeStyling, edgeMarkers } from "./cardinality";
+import { DEFAULT_TOKEN, markerId } from "./markerVariants";
 
 describe("edgeMarkers", () => {
   it("puts the crow's-foot on the many end", () => {
     expect(edgeMarkers("MANY_TO_ONE")).toEqual({
-      markerStart: MARKER_IDS.many,
-      markerEnd: MARKER_IDS.one,
+      markerStart: markerId("many", DEFAULT_TOKEN),
+      markerEnd: markerId("one", DEFAULT_TOKEN),
     });
     expect(edgeMarkers("ONE_TO_MANY")).toEqual({
-      markerStart: MARKER_IDS.one,
-      markerEnd: MARKER_IDS.many,
+      markerStart: markerId("one", DEFAULT_TOKEN),
+      markerEnd: markerId("many", DEFAULT_TOKEN),
     });
   });
 
@@ -21,7 +22,7 @@ describe("edgeMarkers", () => {
     for (const cardinality of cardinalities) {
       const { markerStart, markerEnd } = edgeMarkers(cardinality);
       for (const id of [markerStart, markerEnd]) {
-        expect(id).toMatch(/^dbml-(one|many)$/);
+        expect(id).toMatch(/^dbml-(one|many)--default$/);
       }
     }
   });
@@ -38,8 +39,8 @@ describe("applyEdgeStyling", () => {
       data: { cardinality: "MANY_TO_ONE", kind: "relation" },
     };
     const styled = applyEdgeStyling(edge);
-    expect(styled.markerStart).toBe(MARKER_IDS.many);
-    expect(styled.markerEnd).toBe(MARKER_IDS.one);
+    expect(styled.markerStart).toBe(markerId("many", DEFAULT_TOKEN));
+    expect(styled.markerEnd).toBe(markerId("one", DEFAULT_TOKEN));
   });
 
   it("dashes enum edges without markers", () => {
@@ -53,5 +54,20 @@ describe("applyEdgeStyling", () => {
     const styled = applyEdgeStyling(edge);
     expect(styled.markerStart).toBeUndefined();
     expect(styled.style?.strokeDasharray).toBe("4 3");
+  });
+
+  it("uses the author colour for both the stroke and the markers", () => {
+    const edge: FlowEdge = {
+      id: "rel:a.x->b.y",
+      source: "a",
+      target: "b",
+      sourceHandle: "x",
+      targetHandle: "y",
+      data: { cardinality: "MANY_TO_ONE", kind: "relation", colour: "#61afef" },
+    };
+    const styled = applyEdgeStyling(edge);
+    expect(styled.markerStart).toBe("dbml-many--c-61afef");
+    expect(styled.markerEnd).toBe("dbml-one--c-61afef");
+    expect(styled.style?.stroke).toBe("#61afef");
   });
 });

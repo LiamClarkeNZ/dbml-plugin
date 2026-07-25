@@ -1,5 +1,6 @@
 package nz.co.steelsky.dbmlplugin.preview
 
+import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.ui.ColorUtil
 import java.awt.Color
@@ -16,7 +17,15 @@ object ThemeVars {
 
     fun currentThemeVars(): Map<String, String> {
         val scheme = EditorColorsManager.getInstance().globalScheme
-        return palette(scheme.defaultBackground, scheme.defaultForeground)
+        val fg = scheme.defaultForeground
+        // Keyword colours are designed to be legible against the editor background, which is exactly
+        // what a highlight needs; fall back to the plain foreground when a scheme defines none.
+        val accent = scheme.getAttributes(DefaultLanguageHighlighterColors.KEYWORD)?.foregroundColor ?: fg
+        return palette(scheme.defaultBackground, fg) +
+            mapOf(
+                "--dbml-accent" to hex(accent),
+                "--dbml-font" to fontStack(scheme.editorFontName),
+            )
     }
 
     /** Derives the whole palette from one background/foreground pair. */
@@ -59,4 +68,14 @@ object ThemeVars {
     private const val BADGE_STEP = 0.16
     private const val BORDER_STEP = 0.24
     private const val EDGE_BLEND = 0.55
+}
+
+/**
+ * A CSS font-family value for an IDE font name. The value is wrapped in single quotes, so a stray
+ * `'` in the font name would terminate that CSS value early and a stray `\` could start an
+ * unintended CSS escape; both are stripped to keep the value valid CSS.
+ */
+internal fun fontStack(family: String): String {
+    val safe = family.filterNot { it == '\'' || it == '"' || it == ';' || it == '\\' }.trim()
+    return if (safe.isEmpty()) "monospace" else "'$safe', monospace"
 }

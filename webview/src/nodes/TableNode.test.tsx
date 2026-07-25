@@ -20,8 +20,8 @@ const users: TableModel = {
 
 // The component only reads `data`; build props via ComponentProps to avoid
 // enumerating the full NodeProps surface (which varies across @xyflow versions).
-function renderNode() {
-  const props = { data: { table: users } } as unknown as ComponentProps<typeof TableNode>;
+function renderNode(table: typeof users = users) {
+  const props = { data: { table } } as unknown as ComponentProps<typeof TableNode>;
   return render(
     <ReactFlowProvider>
       <TableNode {...props} />
@@ -47,12 +47,14 @@ describe("TableNode", () => {
     expect(emailRow.textContent).toContain("NN");
   });
 
-  it("shows notes as tooltips", () => {
+  // data-tip, not title: a native tooltip never renders in JCEF's offscreen browser, so the webview
+  // draws its own from this attribute. See useTooltip in src/tooltip.tsx.
+  it("exposes notes for the tooltip", () => {
     renderNode();
     const header = screen.getByText(/users/).closest("[data-kind='table']")!;
-    expect(header).toHaveAttribute("title", "application users");
+    expect(header).toHaveAttribute("data-tip", "application users");
     const emailRow = screen.getByText("email").closest("[data-kind='column']")!;
-    expect(emailRow).toHaveAttribute("title", "login email");
+    expect(emailRow).toHaveAttribute("data-tip", "login email");
   });
 
   it("renders indexes in a footer", () => {
@@ -60,5 +62,27 @@ describe("TableNode", () => {
     const idx = screen.getByText("id, email");
     expect(idx).toBeInTheDocument();
     expect(idx.closest("[data-kind='index']")!.textContent).toContain("U");
+  });
+
+  it("tints the header with the author's colour and picks readable ink", () => {
+    const table = { ...users, headerColor: "#b19888" };
+    renderNode(table);
+    const header = document.querySelector(".dbml-node__header") as HTMLElement;
+    expect(header.style.background).toBe("rgb(177, 152, 136)");
+    expect(header.style.color).toBe("rgb(26, 26, 26)");
+  });
+
+  it("leaves the header themed when no colour is set", () => {
+    renderNode(users);
+    const header = document.querySelector(".dbml-node__header") as HTMLElement;
+    expect(header.style.background).toBe("");
+    expect(header.style.color).toBe("");
+  });
+
+  it("labels badges with their full constraint name", () => {
+    renderNode();
+    const pk = document.querySelector('[data-tip="PRIMARY KEY"]') as HTMLElement;
+    expect(pk.textContent).toBe("PK");
+    expect(document.querySelector('[data-tip="AUTO INCREMENT"]')).not.toBeNull();
   });
 });

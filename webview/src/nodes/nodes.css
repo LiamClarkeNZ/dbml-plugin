@@ -26,14 +26,13 @@
   cursor: pointer;
 }
 .dbml-row:hover { background: var(--dbml-row-hover); }
+.dbml-row--highlight { background: var(--dbml-row-hover); box-shadow: inset 2px 0 0 var(--dbml-accent); }
 .dbml-row__name { flex: 1; }
 .dbml-row__type { opacity: 0.7; }
 .dbml-badge {
   font-size: 9px;
   padding: 0 3px;
   border-radius: 3px;
-  background: var(--dbml-badge-bg);
-  color: var(--dbml-badge-fg);
 }
 .dbml-enum__value { padding: 2px 10px; height: 22px; }
 .dbml-node__indexes {

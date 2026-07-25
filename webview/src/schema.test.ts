@@ -31,4 +31,12 @@ describe("sample fixture conforms to the contract", () => {
   it("groups reference member tables by key", () => {
     expect(schema.groups[0].tableKeys).toEqual(["users", "posts", "comments"]);
   });
+
+  it("carries author colours as lower-case #rrggbb, and omits them where unset", () => {
+    expect(schema.tables[0].headerColor).toBe("#b19888"); // users
+    expect(schema.tables[1].headerColor).toBeUndefined(); // posts, uncoloured
+    expect(schema.groups[0].color).toBe("#7c9772");
+    expect(schema.relations[0].color).toBe("#5b7fbd"); // posts -> users
+    expect(schema.relations[1].color).toBeUndefined(); // comments -> posts, uncoloured
+  });
 });
