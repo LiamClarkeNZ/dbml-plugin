@@ -22,9 +22,9 @@ describe("computeHulls", () => {
     const [hull] = computeHulls(groups, nodes, 10);
     expect(hull.name).toBe("core");
     expect(hull.x).toBe(-10); // min x (0) - pad
-    expect(hull.y).toBe(-28); // min y (0) - padTop (default 28)
+    expect(hull.y).toBe(-48); // min y (0) - padTop (default 48)
     expect(hull.width).toBe(200 + 100 + 20); // spread + node width + 2*pad
-    expect(hull.height).toBe(100 + 50 + 28 + 10); // height + padTop + pad
+    expect(hull.height).toBe(100 + 50 + 48 + 10); // height + padTop + pad
   });
 
   it("skips groups whose members are absent", () => {
@@ -39,10 +39,10 @@ describe("computeHulls", () => {
       { id: "users", type: "table", position: { x: 100, y: 200 }, width: 240, height: 80, data: {} },
     ] as unknown as FlowNode[];
     const [hull] = computeHulls([{ name: "core", tableKeys: ["users"], sourceOffset: 0 }], nodes);
-    expect(hull.y).toBe(200 - 28);
-    expect(hull.x).toBe(100 - 16);
-    expect(hull.height).toBe(80 + 28 + 16);
-    expect(hull.width).toBe(240 + 32);
+    expect(hull.y).toBe(200 - 48);
+    expect(hull.x).toBe(100 - 28);
+    expect(hull.height).toBe(80 + 48 + 28);
+    expect(hull.width).toBe(240 + 56);
   });
 
   it("carries the group colour through", () => {

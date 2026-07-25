@@ -30,6 +30,7 @@ import { nodeTypes } from "./nodes";
 import type { SchemaModel } from "./schema";
 import { EMPTY_HIGHLIGHT, type Highlight, highlightFor } from "./selection";
 import { applyTheme } from "./theme";
+import { Tooltip, useTooltip } from "./tooltip";
 import { type FlowEdge, type FlowNode, toFlow } from "./transform";
 
 declare global {
@@ -172,12 +173,24 @@ function Diagram() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  const {
+    tip,
+    onMouseOver: onTipMouseOver,
+    onMouseOut: onTipMouseOut,
+  } = useTooltip();
+
   const edges = state.edges.map((e) => (highlight.edges.has(e.id) ? withHighlight(e) : e));
 
   return (
     <HighlightContext.Provider value={highlight}>
-      <div className="dbml-app" onClickCapture={onPaneClickCapture}>
+      <div
+        className="dbml-app"
+        onClickCapture={onPaneClickCapture}
+        onMouseOver={onTipMouseOver}
+        onMouseOut={onTipMouseOut}
+      >
         {state.banner ? <div className="dbml-banner">{state.banner}</div> : null}
+        <Tooltip tip={tip} />
         <MarkerDefs tokens={customTokens(state.edges)} />
         <ReactFlow
           nodes={state.nodes}

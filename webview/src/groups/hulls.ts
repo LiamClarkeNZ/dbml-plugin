@@ -14,9 +14,10 @@ export interface Hull {
 export function computeHulls(
   groups: GroupModel[],
   nodes: FlowNode[],
-  pad = 16,
-  // The label chip sits inside the hull, so the top needs room the other sides do not.
-  padTop = 28,
+  pad = 28,
+  // The label chip sits inside the hull, so the top needs a band of its own: enough for the chip
+  // plus clear space, otherwise the chip reads as sitting on top of the first table.
+  padTop = 48,
 ): Hull[] {
   const byId = new Map(nodes.map((n) => [n.id, n]));
   const hulls: Hull[] = [];

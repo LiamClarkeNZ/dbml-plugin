@@ -15,7 +15,8 @@ function Badge({ kind }: { kind: BadgeKind }) {
     <span
       className="dbml-badge"
       style={{ background: badge.bg, color: badge.fg }}
-      title={badge.title}
+      data-tip={badge.title}
+      aria-label={badge.title}
     >
       {badge.label}
     </span>
@@ -35,7 +36,7 @@ export default function TableNode({ data }: Props) {
         style={headerStyle}
         data-kind="table"
         data-offset={table.sourceOffset}
-        title={table.note}
+        data-tip={table.note}
       >
         {table.name}
         {table.alias ? <span className="dbml-node__alias"> ({table.alias})</span> : null}
@@ -52,7 +53,7 @@ export default function TableNode({ data }: Props) {
           data-table={table.key}
           data-column={col.name}
           data-offset={col.sourceOffset}
-          title={col.note}
+          data-tip={col.note}
         >
           <Handle type="target" position={Position.Left} id={col.name} />
           {col.pk ? <Badge kind="pk" /> : null}

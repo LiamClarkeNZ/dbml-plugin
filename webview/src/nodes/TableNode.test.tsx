@@ -47,12 +47,14 @@ describe("TableNode", () => {
     expect(emailRow.textContent).toContain("NN");
   });
 
-  it("shows notes as tooltips", () => {
+  // data-tip, not title: a native tooltip never renders in JCEF's offscreen browser, so the webview
+  // draws its own from this attribute. See useTooltip in src/tooltip.tsx.
+  it("exposes notes for the tooltip", () => {
     renderNode();
     const header = screen.getByText(/users/).closest("[data-kind='table']")!;
-    expect(header).toHaveAttribute("title", "application users");
+    expect(header).toHaveAttribute("data-tip", "application users");
     const emailRow = screen.getByText("email").closest("[data-kind='column']")!;
-    expect(emailRow).toHaveAttribute("title", "login email");
+    expect(emailRow).toHaveAttribute("data-tip", "login email");
   });
 
   it("renders indexes in a footer", () => {
@@ -79,8 +81,8 @@ describe("TableNode", () => {
 
   it("labels badges with their full constraint name", () => {
     renderNode();
-    const pk = document.querySelector('[title="PRIMARY KEY"]') as HTMLElement;
+    const pk = document.querySelector('[data-tip="PRIMARY KEY"]') as HTMLElement;
     expect(pk.textContent).toBe("PK");
-    expect(document.querySelector('[title="AUTO INCREMENT"]')).not.toBeNull();
+    expect(document.querySelector('[data-tip="AUTO INCREMENT"]')).not.toBeNull();
   });
 });
