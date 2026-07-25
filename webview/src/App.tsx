@@ -48,6 +48,19 @@ declare global {
 
 const edgeTypes = { stub: StubEdge };
 
+/*
+ * Scroll pans and pinch zooms, following the IDE's own diagram editors.
+ *
+ * Wheel zoom is off deliberately. For an offscreen browser the IDE multiplies each wheel rotation by
+ * `ide.browser.jcef.osr.wheelRotation.factor` (default 10), so every event in a trackpad's momentum
+ * tail arrived amplified and the zoom kept stepping long after the gesture ended. Panning absorbs
+ * momentum naturally, which is why it is the better home for the raw wheel.
+ *
+ * PAN_ON_SCROLL_SPEED divides that same multiplier back out: React Flow's own default is 0.5, tuned
+ * for unamplified deltas. Tune this one constant if panning feels wrong.
+ */
+const PAN_ON_SCROLL_SPEED = 0.05;
+
 class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() {
@@ -201,6 +214,10 @@ function Diagram() {
           edgeTypes={edgeTypes}
           onEdgeClick={onEdgeClick}
           onPaneClick={clearHighlight}
+          zoomOnScroll={false}
+          panOnScroll
+          panOnScrollSpeed={PAN_ON_SCROLL_SPEED}
+          zoomOnPinch
           fitView
           proOptions={{ hideAttribution: true }}
         >
