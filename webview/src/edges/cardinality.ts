@@ -1,6 +1,6 @@
 import type { Cardinality } from "../schema";
 import type { FlowEdge } from "../transform";
-import { type ColourToken, DEFAULT_TOKEN, markerId } from "./markerVariants";
+import { type ColourToken, DEFAULT_TOKEN, HIGHLIGHT_TOKEN, markerId } from "./markerVariants";
 
 type End = "one" | "many";
 
@@ -28,4 +28,12 @@ export function applyEdgeStyling(edge: FlowEdge): FlowEdge {
   const token: ColourToken = colour ? { kind: "custom", hex: colour } : DEFAULT_TOKEN;
   const { markerStart, markerEnd } = edgeMarkers(edge.data!.cardinality, token);
   return { ...edge, markerStart, markerEnd, style: { ...edge.style, ...stroke } };
+}
+
+/** Restyles an already-styled edge as highlighted, including its markers. */
+export function withHighlight(edge: FlowEdge): FlowEdge {
+  const style = { ...edge.style, stroke: "var(--dbml-accent)", strokeWidth: 2.5 };
+  if (edge.data?.kind === "enum") return { ...edge, style };
+  const { markerStart, markerEnd } = edgeMarkers(edge.data!.cardinality, HIGHLIGHT_TOKEN);
+  return { ...edge, markerStart, markerEnd, style };
 }

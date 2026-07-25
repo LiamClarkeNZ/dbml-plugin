@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "./App";
 import sample from "./fixtures/sample-schema.json";
@@ -52,5 +52,30 @@ describe("App render entrypoint", () => {
       emailRow.click();
     });
     expect(onNav).toHaveBeenCalledWith({ kind: "column", offset: 94 });
+  });
+
+  it("highlights a relation and its columns when a column is clicked", async () => {
+    render(<App />);
+    window.render(JSON.stringify(sample), "h1");
+    await waitFor(() => expect(document.querySelector(".dbml-node")).not.toBeNull());
+
+    const row = document.querySelector('[data-kind="column"][data-table="posts"][data-column="user_id"]');
+    expect(row).not.toBeNull();
+    (row as HTMLElement).click();
+
+    await waitFor(() =>
+      expect(document.querySelectorAll(".dbml-row--highlight").length).toBeGreaterThan(0),
+    );
+  });
+
+  it("clears the highlight on Escape", async () => {
+    render(<App />);
+    window.render(JSON.stringify(sample), "h1");
+    await waitFor(() => expect(document.querySelector(".dbml-node")).not.toBeNull());
+    (document.querySelector('[data-kind="column"][data-table="posts"][data-column="user_id"]') as HTMLElement).click();
+    await waitFor(() => expect(document.querySelectorAll(".dbml-row--highlight").length).toBeGreaterThan(0));
+
+    fireEvent.keyDown(window, { key: "Escape" });
+    await waitFor(() => expect(document.querySelectorAll(".dbml-row--highlight").length).toBe(0));
   });
 });

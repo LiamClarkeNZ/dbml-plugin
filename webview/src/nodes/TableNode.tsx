@@ -1,7 +1,9 @@
 import { Handle, type NodeProps, Position } from "@xyflow/react";
 import type { Node } from "@xyflow/react";
+import { useContext } from "react";
 import { readableInkOn } from "../colour";
-import type { TableNodeData } from "../transform";
+import { HighlightContext } from "../highlight";
+import { columnRowId, type TableNodeData } from "../transform";
 import { BADGES, type BadgeKind } from "./badges";
 import "./nodes.css";
 
@@ -22,6 +24,7 @@ function Badge({ kind }: { kind: BadgeKind }) {
 
 export default function TableNode({ data }: Props) {
   const { table } = data;
+  const highlight = useContext(HighlightContext);
   const headerStyle = table.headerColor
     ? { background: table.headerColor, color: readableInkOn(table.headerColor) }
     : undefined;
@@ -39,9 +42,15 @@ export default function TableNode({ data }: Props) {
       </div>
       {table.columns.map((col) => (
         <div
-          className="dbml-row"
+          className={
+            highlight.columns.has(columnRowId(table.key, col.name))
+              ? "dbml-row dbml-row--highlight"
+              : "dbml-row"
+          }
           key={col.name}
           data-kind="column"
+          data-table={table.key}
+          data-column={col.name}
           data-offset={col.sourceOffset}
           title={col.note}
         >

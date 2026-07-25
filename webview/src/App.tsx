@@ -19,13 +19,15 @@ import {
 import "./App.css";
 import "./theme.css";
 import { MarkerDefs } from "./edges/markers";
-import { applyEdgeStyling } from "./edges/cardinality";
+import { applyEdgeStyling, withHighlight } from "./edges/cardinality";
 import { customTokens } from "./edges/markerVariants";
 import { GroupHulls } from "./groups/GroupHulls";
 import { computeHulls, type Hull } from "./groups/hulls";
+import { HighlightContext } from "./highlight";
 import { layout } from "./layout";
 import { nodeTypes } from "./nodes";
 import type { SchemaModel } from "./schema";
+import { EMPTY_HIGHLIGHT, type Highlight, highlightFor } from "./selection";
 import { applyTheme } from "./theme";
 import { type FlowEdge, type FlowNode, toFlow } from "./transform";
 
@@ -70,6 +72,8 @@ function Diagram() {
   });
   const lastHash = useRef<string | null>(null);
   const groupsRef = useRef<SchemaModel["groups"]>([]);
+  const schemaRef = useRef<SchemaModel | null>(null);
+  const [highlight, setHighlight] = useState<Highlight>(EMPTY_HIGHLIGHT);
 
   const doRender = useCallback(async (json: string, hash: string) => {
     let schema: SchemaModel;
@@ -83,6 +87,7 @@ function Diagram() {
       const { nodes, edges, danglingCount } = toFlow(schema);
       const styledEdges = edges.map(applyEdgeStyling);
       groupsRef.current = schema.groups;
+      schemaRef.current = schema;
 
       const parts: string[] = [];
       if (schema.parseErrorCount > 0) parts.push(`${schema.parseErrorCount} parse error(s)`);
@@ -134,31 +139,61 @@ function Diagram() {
 
   const onPaneClickCapture = useCallback((e: ReactMouseEvent) => {
     const el = (e.target as HTMLElement).closest("[data-kind]") as HTMLElement | null;
-    if (!el || !window.__onNavigate) return;
+    if (!el) return;
     const kind = el.getAttribute("data-kind") as "table" | "column" | "enum";
     const offset = Number(el.getAttribute("data-offset"));
-    if (Number.isFinite(offset)) window.__onNavigate({ kind, offset });
+    if (Number.isFinite(offset) && window.__onNavigate) window.__onNavigate({ kind, offset });
+
+    const table = el.getAttribute("data-table");
+    const column = el.getAttribute("data-column");
+    const schema = schemaRef.current;
+    if (kind === "column" && table && column && schema) {
+      setHighlight(highlightFor(schema, { kind: "column", table, column }));
+    }
   }, []);
 
+  // Typed on the id alone: ReactFlow infers its onEdgeClick parameter from the edges prop, and
+  // narrowing to FlowEdge here can trip variance. Only the id is needed.
+  const onEdgeClick = useCallback((_: ReactMouseEvent, edge: { id: string }) => {
+    const schema = schemaRef.current;
+    if (schema) setHighlight(highlightFor(schema, { kind: "edge", id: edge.id }));
+  }, []);
+
+  const clearHighlight = useCallback(() => setHighlight(EMPTY_HIGHLIGHT), []);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setHighlight(EMPTY_HIGHLIGHT);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  const edges = state.edges.map((e) => (highlight.edges.has(e.id) ? withHighlight(e) : e));
+
   return (
-    <div className="dbml-app" onClickCapture={onPaneClickCapture}>
-      {state.banner ? <div className="dbml-banner">{state.banner}</div> : null}
-      <MarkerDefs tokens={customTokens(state.edges)} />
-      <ReactFlow
-        nodes={state.nodes}
-        edges={state.edges}
-        nodeTypes={nodeTypes}
-        fitView
-        proOptions={{ hideAttribution: true }}
-      >
-        <Background />
-        <Controls />
-        <MiniMap pannable zoomable />
-        <ViewportPortal>
-          <GroupHulls hulls={state.hulls} />
-        </ViewportPortal>
-      </ReactFlow>
-    </div>
+    <HighlightContext.Provider value={highlight}>
+      <div className="dbml-app" onClickCapture={onPaneClickCapture}>
+        {state.banner ? <div className="dbml-banner">{state.banner}</div> : null}
+        <MarkerDefs tokens={customTokens(state.edges)} />
+        <ReactFlow
+          nodes={state.nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          onEdgeClick={onEdgeClick}
+          onPaneClick={clearHighlight}
+          fitView
+          proOptions={{ hideAttribution: true }}
+        >
+          <Background />
+          <Controls />
+          <MiniMap pannable zoomable />
+          <ViewportPortal>
+            <GroupHulls hulls={state.hulls} />
+          </ViewportPortal>
+        </ReactFlow>
+      </div>
+    </HighlightContext.Provider>
   );
 }
 
