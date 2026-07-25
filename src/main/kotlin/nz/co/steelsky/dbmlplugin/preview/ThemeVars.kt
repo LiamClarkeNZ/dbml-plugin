@@ -71,8 +71,9 @@ object ThemeVars {
 }
 
 /**
- * A CSS font-family value for an IDE font name. Single quotes avoid nesting inside the double-quoted
- * JS literal the bridge builds, and characters that could terminate the CSS value are dropped.
+ * A CSS font-family value for an IDE font name. The value is wrapped in single quotes, so a stray
+ * `'` in the font name would terminate that CSS value early and a stray `\` could start an
+ * unintended CSS escape; both are stripped to keep the value valid CSS.
  */
 internal fun fontStack(family: String): String {
     val safe = family.filterNot { it == '\'' || it == '"' || it == ';' || it == '\\' }.trim()

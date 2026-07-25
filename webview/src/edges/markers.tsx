@@ -1,4 +1,4 @@
-import { type ColourToken, DEFAULT_TOKEN, HIGHLIGHT_TOKEN, markerId } from "./markerVariants";
+import { type ColourToken, DEFAULT_TOKEN, HIGHLIGHT_TOKEN, MARKER_ENDS, markerId } from "./markerVariants";
 
 const MARKER_PATHS = { one: "M6,1 L6,11", many: "M11,1 L1,6 L11,11" } as const;
 
@@ -7,7 +7,7 @@ function MarkerPair({ token }: { token: ColourToken }) {
   const className = token.kind === "custom" ? "dbml-marker" : `dbml-marker dbml-marker--${token.role}`;
   return (
     <>
-      {(["one", "many"] as const).map((end) => (
+      {MARKER_ENDS.map((end) => (
         <marker
           key={end}
           id={markerId(end, token)}
@@ -16,6 +16,7 @@ function MarkerPair({ token }: { token: ColourToken }) {
           refY="6"
           markerWidth={end === "many" ? 14 : 12}
           markerHeight={end === "many" ? 14 : 12}
+          markerUnits="userSpaceOnUse"
           orient="auto-start-reverse"
         >
           <path className={className} style={style} d={MARKER_PATHS[end]} />

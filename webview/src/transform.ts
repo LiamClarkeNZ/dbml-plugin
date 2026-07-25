@@ -21,7 +21,11 @@ export type FlowNode =
 export interface EdgeData extends Record<string, unknown> {
   cardinality: Cardinality;
   kind: "relation" | "enum";
-  /** Author colour from a standalone Ref's `color` setting. */
+  /**
+   * Author colour from a standalone Ref's `color` setting. Guaranteed lower-case `#rrggbb` by
+   * `SchemaExtractor.normaliseColour`, which is why `applyEdgeStyling`, `markerId` and `GroupHulls`
+   * can interpolate it straight into CSS and into an SVG element id without further validation.
+   */
   colour?: string;
 }
 export type FlowEdge = Edge<EdgeData>;

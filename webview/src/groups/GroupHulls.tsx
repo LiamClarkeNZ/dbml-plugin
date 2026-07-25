@@ -22,7 +22,9 @@ export function GroupHulls({ hulls }: { hulls: Hull[] }) {
               position: "absolute",
               top: 6,
               left: 8,
-              font: "600 10px sans-serif",
+              fontWeight: 600,
+              fontSize: 10,
+              fontFamily: "var(--dbml-font, sans-serif)",
               letterSpacing: "0.04em",
               color: "var(--dbml-fg)",
               background: h.colour
