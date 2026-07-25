@@ -60,6 +60,12 @@ describe("highlightFor", () => {
     expect([...hl.columns].sort()).toEqual(["order_items.product_id", "products.id"]);
   });
 
+  it("fans out from a column that is a from endpoint", () => {
+    const hl = highlightFor(schema, { kind: "column", table: "order_items", column: "product_id" });
+    expect([...hl.edges]).toEqual(["rel:order_items.product_id->products.id"]);
+    expect([...hl.columns].sort()).toEqual(["order_items.product_id", "products.id"]);
+  });
+
   it("ignores unresolved relations, which draw no edge", () => {
     const only = { ...schema, relations: [relation("a", "x", "b", "y", false)] };
     const hl = highlightFor(only, { kind: "column", table: "a", column: "x" });
