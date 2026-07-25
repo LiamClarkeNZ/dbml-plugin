@@ -23,6 +23,9 @@ describe("stubPath", () => {
   it("curves between the inset endpoints, not the raw ones", () => {
     const d = stubPath(params);
     expect(d).toContain(`L${100 + STUB_LENGTH},50`);
-    expect(d).toContain(`L300,200`);
+    // Pins where the curve itself terminates (300 - STUB_LENGTH = 286), not just where the
+    // path string ends up after the lead-out is appended - a dropped or misapplied target
+    // inset would still leave the string ending in "L300,200" and slip past a weaker check.
+    expect(d).toMatch(/C[\d.,\s]+ 286,200 L300,200$/);
   });
 });
