@@ -33,6 +33,37 @@ export function estimateSize(node: FlowNode): { width: number; height: number } 
   return { width: NODE_WIDTH, height: ENUM_HEADER + values * ENUM_ROW + PADDING };
 }
 
+/**
+ * ELK reports a child's position relative to its parent; the canvas needs absolute coordinates.
+ *
+ * `children` is the top level of an ELK layout result (i.e. `result.children`, all direct
+ * children of the implicit root, whose own origin is (0, 0)). Root-level children are therefore
+ * already absolute. A `groupParentIds` member is a synthetic group parent: its own `x`/`y` is
+ * its absolute origin, and each of its `children` (the real member nodes) gets that origin added
+ * to its relative `x`/`y` exactly once.
+ */
+export function absolutePositions(
+  children: ElkNode[],
+  groupParentIds: Set<string>,
+): Map<string, { x: number; y: number }> {
+  const positions = new Map<string, { x: number; y: number }>();
+  for (const child of children) {
+    if (groupParentIds.has(child.id)) {
+      const originX = child.x ?? 0;
+      const originY = child.y ?? 0;
+      for (const grandchild of child.children ?? []) {
+        positions.set(grandchild.id, {
+          x: originX + (grandchild.x ?? 0),
+          y: originY + (grandchild.y ?? 0),
+        });
+      }
+    } else {
+      positions.set(child.id, { x: child.x ?? 0, y: child.y ?? 0 });
+    }
+  }
+  return positions;
+}
+
 export async function layout(
   nodes: FlowNode[],
   edges: FlowEdge[],
@@ -102,26 +133,7 @@ export async function layout(
   };
 
   const result = await elk.layout(graph);
-
-  // ELK returns each child's x/y relative to its parent. Root-level children (ungrouped tables,
-  // enums, and the group parents themselves) are already in absolute canvas coordinates because
-  // root's own origin is (0, 0); a grouped node's absolute position is its parent's origin plus
-  // its own relative position, added exactly once.
-  const positions = new Map<string, { x: number; y: number }>();
-  for (const child of result.children ?? []) {
-    if (groupParentIds.has(child.id)) {
-      const originX = child.x ?? 0;
-      const originY = child.y ?? 0;
-      for (const grandchild of child.children ?? []) {
-        positions.set(grandchild.id, {
-          x: originX + (grandchild.x ?? 0),
-          y: originY + (grandchild.y ?? 0),
-        });
-      }
-    } else {
-      positions.set(child.id, { x: child.x ?? 0, y: child.y ?? 0 });
-    }
-  }
+  const positions = absolutePositions(result.children ?? [], groupParentIds);
 
   return nodes.map((n) => {
     const size = sizes.get(n.id)!;

@@ -1,6 +1,7 @@
+import type { ElkNode } from "elkjs/lib/elk.bundled.js";
 import { describe, expect, it } from "vitest";
 import sample from "./fixtures/sample-schema.json";
-import { layout } from "./layout";
+import { absolutePositions, layout } from "./layout";
 import type {
   ColumnModel,
   EnumModel,
@@ -154,22 +155,6 @@ describe("group-aware layout", () => {
     expect(intersects(core, catalogue)).toBe(false);
   });
 
-  it("places a grouped node's absolute position inside its own group's box", async () => {
-    const { schema, flow } = twoGroupSchema();
-    const positioned = await layout(flow.nodes, flow.edges, schema.groups);
-    const byId = new Map(positioned.map((n) => [n.id, n]));
-
-    const core = boundingBox(["users", "orders", "order_items"], positioned);
-    const orderItems = byId.get("order_items")!;
-
-    // Would fail if the parent's origin were added twice (pushed far outside the box) or
-    // never added (left at the parent-relative coordinate, likely outside the absolute box).
-    expect(orderItems.position.x).toBeGreaterThanOrEqual(core.minX);
-    expect(orderItems.position.x + (orderItems.width ?? 0)).toBeLessThanOrEqual(core.maxX);
-    expect(orderItems.position.y).toBeGreaterThanOrEqual(core.minY);
-    expect(orderItems.position.y + (orderItems.height ?? 0)).toBeLessThanOrEqual(core.maxY);
-  });
-
   it("still gives ungrouped tables and enums finite, distinct positions", async () => {
     const { schema, flow } = twoGroupSchema();
     const positioned = await layout(flow.nodes, flow.edges, schema.groups);
@@ -203,5 +188,79 @@ describe("group-aware layout", () => {
     expect(productNodes).toHaveLength(1);
     expect(Number.isFinite(productNodes[0].position.x)).toBe(true);
     expect(Number.isFinite(productNodes[0].position.y)).toBe(true);
+  });
+});
+
+// --- absolutePositions: pin the relative-to-absolute arithmetic directly, no elkjs call --------
+
+describe("absolutePositions", () => {
+  it("leaves a root-level node's position untouched", () => {
+    const children: ElkNode[] = [{ id: "ungrouped", x: 500, y: 40, width: 240, height: 80 }];
+
+    const positions = absolutePositions(children, new Set());
+
+    expect(positions.get("ungrouped")).toEqual({ x: 500, y: 40 });
+  });
+
+  it("adds a group parent's origin to a member's relative position exactly once", () => {
+    const children: ElkNode[] = [
+      {
+        id: "__group__0",
+        x: 100,
+        y: 200,
+        width: 300,
+        height: 150,
+        children: [{ id: "member", x: 10, y: 20, width: 240, height: 80 }],
+      },
+    ];
+
+    const positions = absolutePositions(children, new Set(["__group__0"]));
+
+    // 100 + 10 = 110, 200 + 20 = 220. A doubled origin would give (210, 420); an omitted
+    // origin would give (10, 20). Both are different numbers from the one asserted here.
+    expect(positions.get("member")).toEqual({ x: 110, y: 220 });
+  });
+
+  it("offsets each group's members by that group's own origin, not another group's", () => {
+    const children: ElkNode[] = [
+      {
+        id: "__group__0",
+        x: 0,
+        y: 0,
+        width: 300,
+        height: 150,
+        children: [{ id: "a", x: 10, y: 20, width: 240, height: 80 }],
+      },
+      {
+        id: "__group__1",
+        x: 668,
+        y: 12,
+        width: 300,
+        height: 150,
+        children: [{ id: "b", x: 28, y: 48, width: 240, height: 80 }],
+      },
+    ];
+
+    const positions = absolutePositions(children, new Set(["__group__0", "__group__1"]));
+
+    expect(positions.get("a")).toEqual({ x: 10, y: 20 });
+    expect(positions.get("b")).toEqual({ x: 696, y: 60 }); // 668+28, 12+48
+  });
+
+  it("offsets a single-member group's member the same way as a multi-member group", () => {
+    const children: ElkNode[] = [
+      {
+        id: "__group__0",
+        x: 50,
+        y: 75,
+        width: 296,
+        height: 156,
+        children: [{ id: "solo", x: 28, y: 48, width: 240, height: 80 }],
+      },
+    ];
+
+    const positions = absolutePositions(children, new Set(["__group__0"]));
+
+    expect(positions.get("solo")).toEqual({ x: 78, y: 123 }); // 50+28, 75+48
   });
 });
