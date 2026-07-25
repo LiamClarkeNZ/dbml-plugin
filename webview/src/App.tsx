@@ -206,6 +206,17 @@ function Diagram() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [zoomIn, zoomOut, fitView]);
 
+  // React Flow's own control buttons label themselves with native title attributes, which never
+  // render in JCEF's offscreen browser, leaving the whole bar unlabelled in the IDE. Mirror them
+  // onto data-tip so the DOM tooltip covers them too.
+  useEffect(() => {
+    for (const button of document.querySelectorAll<HTMLElement>(
+      ".react-flow__controls-button[title]",
+    )) {
+      button.dataset.tip = button.title;
+    }
+  }, []);
+
   const {
     tip,
     onMouseOver: onTipMouseOver,
