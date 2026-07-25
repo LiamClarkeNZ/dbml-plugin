@@ -14,4 +14,5 @@
 .dbml-fallback { padding: 16px; color: var(--dbml-fg); font-family: sans-serif; }
 /* Cardinality markers must be styled here, not with stroke/fill attributes: var() is only valid
    in CSS property values, so a presentation attribute leaves stroke at its initial "none". */
-.dbml-marker { stroke: var(--dbml-edge); stroke-width: 1.5; fill: none; }
+.dbml-marker { stroke-width: 1.5; fill: none; }
+.dbml-marker--default { stroke: var(--dbml-edge); }

@@ -20,6 +20,7 @@ import "./App.css";
 import "./theme.css";
 import { MarkerDefs } from "./edges/markers";
 import { applyEdgeStyling } from "./edges/cardinality";
+import { customTokens } from "./edges/markerVariants";
 import { GroupHulls } from "./groups/GroupHulls";
 import { computeHulls, type Hull } from "./groups/hulls";
 import { layout } from "./layout";
@@ -142,7 +143,7 @@ function Diagram() {
   return (
     <div className="dbml-app" onClickCapture={onPaneClickCapture}>
       {state.banner ? <div className="dbml-banner">{state.banner}</div> : null}
-      <MarkerDefs />
+      <MarkerDefs tokens={customTokens(state.edges)} />
       <ReactFlow
         nodes={state.nodes}
         edges={state.edges}

@@ -20,6 +20,8 @@ export type FlowNode =
 export interface EdgeData extends Record<string, unknown> {
   cardinality: Cardinality;
   kind: "relation" | "enum";
+  /** Author colour from a standalone Ref's `color` setting. */
+  colour?: string;
 }
 export type FlowEdge = Edge<EdgeData>;
 
@@ -68,7 +70,7 @@ export function toFlow(schema: SchemaModel): FlowData {
       sourceHandle,
       target: r.toTable,
       targetHandle,
-      data: { cardinality: r.cardinality, kind: "relation" },
+      data: { cardinality: r.cardinality, kind: "relation", colour: r.color },
     });
   }
 
