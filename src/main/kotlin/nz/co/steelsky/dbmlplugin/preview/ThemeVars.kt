@@ -16,7 +16,8 @@ object ThemeVars {
 
     fun currentThemeVars(): Map<String, String> {
         val scheme = EditorColorsManager.getInstance().globalScheme
-        return palette(scheme.defaultBackground, scheme.defaultForeground)
+        return palette(scheme.defaultBackground, scheme.defaultForeground) +
+            mapOf("--dbml-font" to fontStack(scheme.editorFontName))
     }
 
     /** Derives the whole palette from one background/foreground pair. */
@@ -59,4 +60,13 @@ object ThemeVars {
     private const val BADGE_STEP = 0.16
     private const val BORDER_STEP = 0.24
     private const val EDGE_BLEND = 0.55
+}
+
+/**
+ * A CSS font-family value for an IDE font name. Single quotes avoid nesting inside the double-quoted
+ * JS literal the bridge builds, and characters that could terminate the CSS value are dropped.
+ */
+internal fun fontStack(family: String): String {
+    val safe = family.filterNot { it == '\'' || it == '"' || it == ';' || it == '\\' }.trim()
+    return if (safe.isEmpty()) "monospace" else "'$safe', monospace"
 }
