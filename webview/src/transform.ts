@@ -2,6 +2,7 @@ import type { Edge, Node } from "@xyflow/react";
 import type {
   Cardinality,
   EnumModel,
+  RelationModel,
   SchemaModel,
   TableModel,
 } from "./schema";
@@ -35,6 +36,12 @@ export const tableNodeId = (key: string): string => key;
 export const enumNodeId = (key: string): string => `enum:${key}`;
 export const columnHandleId = (columnName: string): string => columnName;
 
+/** Edge id for a relation. Shared with selection.ts so the format cannot drift. */
+export const relationEdgeId = (r: RelationModel): string =>
+  `rel:${r.fromTable}.${columnHandleId(r.fromColumns[0])}->${r.toTable}.${columnHandleId(r.toColumns[0])}`;
+
+export const columnRowId = (tableKey: string, column: string): string => `${tableKey}.${column}`;
+
 export function toFlow(schema: SchemaModel): FlowData {
   const tableKeys = new Set(schema.tables.map((t) => t.key));
   const enumKeys = new Set(schema.enums.map((e) => e.key));
@@ -65,7 +72,7 @@ export function toFlow(schema: SchemaModel): FlowData {
     const sourceHandle = columnHandleId(r.fromColumns[0]);
     const targetHandle = columnHandleId(r.toColumns[0]);
     edges.push({
-      id: `rel:${r.fromTable}.${sourceHandle}->${r.toTable}.${targetHandle}`,
+      id: relationEdgeId(r),
       source: r.fromTable,
       sourceHandle,
       target: r.toTable,
