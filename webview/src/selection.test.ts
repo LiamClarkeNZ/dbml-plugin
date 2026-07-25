@@ -29,7 +29,7 @@ const relation = (fromTable: string, fromColumn: string, toTable: string, toColu
 });
 
 const schema: SchemaModel = {
-  tables: [table("products", ["id"]), table("order_items", ["product_id"]), table("wishlists", ["product_id"])],
+  tables: [table("products", ["id", "name"]), table("order_items", ["product_id"]), table("wishlists", ["product_id"])],
   enums: [],
   relations: [
     relation("order_items", "product_id", "products", "id"),

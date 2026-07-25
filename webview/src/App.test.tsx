@@ -63,9 +63,16 @@ describe("App render entrypoint", () => {
     expect(row).not.toBeNull();
     fireEvent.click(row as HTMLElement);
 
-    await waitFor(() =>
-      expect(document.querySelectorAll(".dbml-row--highlight").length).toBeGreaterThan(0),
-    );
+    // The fixture's only relation touching posts.user_id is posts.user_id -> users.id, so both
+    // endpoints - not just the clicked row - must carry the highlight class.
+    await waitFor(() => {
+      expect(
+        document.querySelector('[data-table="posts"][data-column="user_id"]'),
+      ).toHaveClass("dbml-row--highlight");
+      expect(
+        document.querySelector('[data-table="users"][data-column="id"]'),
+      ).toHaveClass("dbml-row--highlight");
+    });
   });
 
   it("clears the highlight on Escape", async () => {
@@ -73,7 +80,11 @@ describe("App render entrypoint", () => {
     window.render(JSON.stringify(sample), "h1");
     await waitFor(() => expect(document.querySelector(".dbml-node")).not.toBeNull());
     fireEvent.click(document.querySelector('[data-kind="column"][data-table="posts"][data-column="user_id"]') as HTMLElement);
-    await waitFor(() => expect(document.querySelectorAll(".dbml-row--highlight").length).toBeGreaterThan(0));
+    await waitFor(() =>
+      expect(document.querySelector('[data-table="users"][data-column="id"]')).toHaveClass(
+        "dbml-row--highlight",
+      ),
+    );
 
     fireEvent.keyDown(window, { key: "Escape" });
     await waitFor(() => expect(document.querySelectorAll(".dbml-row--highlight").length).toBe(0));

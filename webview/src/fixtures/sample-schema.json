@@ -11,7 +11,8 @@
         { "name": "status", "type": "job_status", "pk": false, "unique": false, "notNull": false, "increment": false, "sourceOffset": 129 }
       ],
       "indexes": [],
-      "sourceOffset": 54
+      "sourceOffset": 54,
+      "headerColor": "#b19888"
     },
     {
       "key": "posts",
@@ -42,11 +43,11 @@
     { "key": "job_status", "name": "job_status", "values": ["created", "running", "done"], "sourceOffset": 5 }
   ],
   "relations": [
-    { "fromTable": "posts", "fromColumns": ["user_id"], "toTable": "users", "toColumns": ["id"], "cardinality": "MANY_TO_ONE", "resolved": true, "sourceOffset": 374 },
+    { "fromTable": "posts", "fromColumns": ["user_id"], "toTable": "users", "toColumns": ["id"], "cardinality": "MANY_TO_ONE", "resolved": true, "sourceOffset": 374, "color": "#5b7fbd" },
     { "fromTable": "comments", "fromColumns": ["post_id"], "toTable": "posts", "toColumns": ["id"], "cardinality": "MANY_TO_ONE", "resolved": true, "sourceOffset": 354 }
   ],
   "groups": [
-    { "name": "core", "tableKeys": ["users", "posts", "comments"], "sourceOffset": 405 }
+    { "name": "core", "tableKeys": ["users", "posts", "comments"], "sourceOffset": 405, "color": "#7c9772" }
   ],
   "parseErrorCount": 0
 }
