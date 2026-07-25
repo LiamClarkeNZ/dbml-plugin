@@ -1,17 +1,29 @@
 import { describe, expect, it } from "vitest";
 import type { FlowEdge } from "../transform";
-import { applyEdgeStyling, edgeMarkers } from "./cardinality";
+import { applyEdgeStyling, edgeMarkers, MARKER_IDS } from "./cardinality";
 
 describe("edgeMarkers", () => {
   it("puts the crow's-foot on the many end", () => {
     expect(edgeMarkers("MANY_TO_ONE")).toEqual({
-      markerStart: "url(#dbml-many)",
-      markerEnd: "url(#dbml-one)",
+      markerStart: MARKER_IDS.many,
+      markerEnd: MARKER_IDS.one,
     });
     expect(edgeMarkers("ONE_TO_MANY")).toEqual({
-      markerStart: "url(#dbml-one)",
-      markerEnd: "url(#dbml-many)",
+      markerStart: MARKER_IDS.one,
+      markerEnd: MARKER_IDS.many,
     });
+  });
+
+  // React Flow renders string markers as url('#' + value). A pre-wrapped url(#id) therefore becomes
+  // url('#url(#id)') and silently references nothing, which is how the markers shipped invisible.
+  it("emits bare element ids, never a url() wrapper", () => {
+    const cardinalities = ["ONE_TO_ONE", "ONE_TO_MANY", "MANY_TO_ONE", "MANY_TO_MANY"] as const;
+    for (const cardinality of cardinalities) {
+      const { markerStart, markerEnd } = edgeMarkers(cardinality);
+      for (const id of [markerStart, markerEnd]) {
+        expect(id).toMatch(/^dbml-(one|many)$/);
+      }
+    }
   });
 });
 
@@ -26,8 +38,8 @@ describe("applyEdgeStyling", () => {
       data: { cardinality: "MANY_TO_ONE", kind: "relation" },
     };
     const styled = applyEdgeStyling(edge);
-    expect(styled.markerStart).toBe("url(#dbml-many)");
-    expect(styled.markerEnd).toBe("url(#dbml-one)");
+    expect(styled.markerStart).toBe(MARKER_IDS.many);
+    expect(styled.markerEnd).toBe(MARKER_IDS.one);
   });
 
   it("dashes enum edges without markers", () => {

@@ -8,5 +8,28 @@
   --dbml-badge-bg: #dbe4f0;
   --dbml-badge-fg: #26456e;
   --dbml-edge: #6b7280;
+
+  /* React Flow reads each of its own colours as var(--xy-X-props, var(--xy-X, var(--xy-X-default)))
+     and never defines the middle tier itself, so defining it here themes the built-in chrome -
+     controls, minimap, background dots, handles and edge strokes - from the palette above. */
+  --xy-background-color: var(--dbml-bg);
+  --xy-background-pattern-color: var(--dbml-border);
+  --xy-edge-stroke: var(--dbml-edge);
+  --xy-edge-stroke-selected: var(--dbml-fg);
+  --xy-edge-label-background-color: var(--dbml-node-bg);
+  --xy-edge-label-color: var(--dbml-fg);
+  --xy-handle-background-color: var(--dbml-border);
+  --xy-handle-border-color: var(--dbml-node-bg);
+  --xy-controls-button-background-color: var(--dbml-node-bg);
+  --xy-controls-button-background-color-hover: var(--dbml-row-hover);
+  --xy-controls-button-border-color: var(--dbml-border);
+  --xy-controls-button-color: var(--dbml-fg);
+  --xy-controls-button-color-hover: var(--dbml-fg);
+  --xy-minimap-background-color: var(--dbml-bg);
+  --xy-minimap-mask-background-color: var(--dbml-node-bg);
+  --xy-minimap-node-background-color: var(--dbml-header-bg);
+  --xy-minimap-node-stroke-color: var(--dbml-border);
 }
 html, body, #root { height: 100%; margin: 0; background: var(--dbml-bg); }
+/* The mask covers everything outside the viewport; a solid fill would hide it entirely. */
+.react-flow__minimap-mask { fill-opacity: 0.6; }

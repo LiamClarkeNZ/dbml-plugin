@@ -50,6 +50,12 @@ jobs:
           distribution: zulu
           java-version: 21
 
+      # Set up Node for the visualisation webview build
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       # Setup Gradle
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -100,6 +106,12 @@ jobs:
         with:
           distribution: zulu
           java-version: 21
+
+      # Set up Node for the visualisation webview build
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       # Setup Gradle
       - name: Setup Gradle
@@ -158,6 +170,12 @@ jobs:
           distribution: zulu
           java-version: 21
 
+      # Set up Node for the visualisation webview build
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       # Run Qodana inspections
       - name: Qodana - Code Inspection
         uses: JetBrains/qodana-action@v2025.1.1
@@ -188,6 +206,12 @@ jobs:
         with:
           distribution: zulu
           java-version: 21
+
+      # Set up Node for the visualisation webview build
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       # Setup Gradle
       - name: Setup Gradle

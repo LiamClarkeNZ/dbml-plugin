@@ -10,6 +10,7 @@ grammarKit = "2023.3.0.3"
 intelliJPlatform = "2.11.0"
 kotlin = "2.3.0"
 kover = "0.9.8"
+nodeGradle = "7.1.0"
 qodana = "2025.3.1"
 
 [libraries]
@@ -23,4 +24,5 @@ grammarKit = { id = "org.jetbrains.grammarkit", version.ref = "grammarKit" }
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "intelliJPlatform" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+node = { id = "com.github.node-gradle.node", version.ref = "nodeGradle" }
 qodana = { id = "org.jetbrains.qodana", version.ref = "qodana" }

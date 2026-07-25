@@ -19,5 +19,6 @@
         <lang.commenter language="DBML"
                   implementationClass="nz.co.steelsky.dbmlplugin.DbmlCommenter"/>
         <colorProvider implementation="nz.co.steelsky.dbmlplugin.highlighting.DbmlColorProvider"/>
+        <fileEditorProvider implementation="nz.co.steelsky.dbmlplugin.preview.DbmlPreviewFileEditorProvider"/>
     </extensions>
 </idea-plugin>
