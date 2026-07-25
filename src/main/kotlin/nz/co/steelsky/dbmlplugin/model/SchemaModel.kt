@@ -38,6 +38,8 @@ data class TableModel(
     val columns: List<ColumnModel>,
     val indexes: List<IndexModel>,
     val sourceOffset: Int,
+    /** Lower-case `#rrggbb` from the DBML `headercolor` setting, or null when unset. */
+    val headerColor: String? = null,
 )
 
 data class EnumModel(
@@ -57,12 +59,16 @@ data class RelationModel(
     /** True when both endpoints matched a table in this schema. */
     val resolved: Boolean,
     val sourceOffset: Int,
+    /** Lower-case `#rrggbb` from a standalone Ref's `color` setting, or null. Inline refs cannot carry one. */
+    val color: String? = null,
 )
 
 data class GroupModel(
     val name: String,
     val tableKeys: List<String>,
     val sourceOffset: Int,
+    /** Lower-case `#rrggbb` from the DBML table group `color` setting, or null when unset. */
+    val color: String? = null,
 )
 
 data class SchemaModel(

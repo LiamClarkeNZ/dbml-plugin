@@ -1,5 +1,6 @@
 package nz.co.steelsky.dbmlplugin.model
 
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.TokenSet
@@ -18,6 +19,18 @@ import nz.co.steelsky.dbmlplugin.psi.DbmlTableDefinition
 import nz.co.steelsky.dbmlplugin.psi.DbmlTableGroup
 import nz.co.steelsky.dbmlplugin.psi.DbmlTypes
 
+private val COLOUR_PATTERN = Regex("^#([0-9a-f]{3}|[0-9a-f]{6})$")
+
+/**
+ * Normalises a DBML colour code to lower-case `#rrggbb`, expanding the three-digit form. Returns null
+ * for anything else, so a value the lexer somehow admitted cannot reach the webview as invalid CSS.
+ */
+internal fun normaliseColour(raw: String?): String? {
+    val value = raw?.trim()?.lowercase() ?: return null
+    val digits = COLOUR_PATTERN.matchEntire(value)?.groupValues?.get(1) ?: return null
+    return if (digits.length == 3) "#" + digits.map { "$it$it" }.joinToString("") else "#$digits"
+}
+
 object SchemaExtractor {
 
     /** Tokens the grammar accepts wherever an identifier may appear (mirrors `identifier_` in Dbml.bnf). */
@@ -29,6 +42,10 @@ object SchemaExtractor {
         DbmlTypes.CASCADE, DbmlTypes.RESTRICT, DbmlTypes.SET, DbmlTypes.NO, DbmlTypes.ACTION,
         DbmlTypes.HEADERCOLOR, DbmlTypes.COLOR, DbmlTypes.AS,
     )
+
+    /** The COLOR_CODE token text on a settings element, or null when this setting is not a colour. */
+    private fun PsiElement.colourCode(): String? =
+        node.findChildByType(DbmlTypes.COLOR_CODE)?.text
 
     fun extract(file: PsiFile): SchemaModel {
         val tables = PsiTreeUtil.getChildrenOfTypeAsList(file, DbmlTableDefinition::class.java)
@@ -55,6 +72,10 @@ object SchemaExtractor {
             columns = columns,
             indexes = t.indexesDefinitionList.flatMap { it.indexDefinitionList }.map(::extractIndex),
             sourceOffset = (nameEl ?: t).textRange.startOffset,
+            headerColor = t.tableSettings?.tableSettingList
+                ?.firstOrNull { it.node.findChildByType(DbmlTypes.HEADERCOLOR) != null }
+                ?.colourCode()
+                ?.let(::normaliseColour),
         )
     }
 
@@ -132,6 +153,10 @@ object SchemaExtractor {
                     relText = body.relation.text,
                     resolver = resolver,
                     offset = refDef.textRange.startOffset,
+                    colour = body.refSettings?.refSettingList
+                        ?.firstOrNull { it.node.findChildByType(DbmlTypes.COLOR) != null }
+                        ?.colourCode()
+                        ?.let(::normaliseColour),
                 ),
             )
         }
@@ -156,6 +181,7 @@ object SchemaExtractor {
         relText: String,
         resolver: TableResolver,
         offset: Int,
+        colour: String? = null,
     ): RelationModel {
         val fromKey = resolver.resolve(from.table)
         val toKey = resolver.resolve(to.table)
@@ -167,6 +193,7 @@ object SchemaExtractor {
             cardinality = cardinalityOf(relText),
             resolved = fromKey != null && toKey != null,
             sourceOffset = offset,
+            color = colour,
         )
     }
 
@@ -227,6 +254,10 @@ object SchemaExtractor {
         name = groupName(g),
         tableKeys = g.tableGroupEntryList.map { normalize(it.tableName.text) },
         sourceOffset = g.textRange.startOffset,
+        color = g.tableGroupSettings?.tableGroupSettingList
+            ?.firstOrNull { it.node.findChildByType(DbmlTypes.COLOR) != null }
+            ?.colourCode()
+            ?.let(::normaliseColour),
     )
 
     private fun groupName(g: DbmlTableGroup): String =
