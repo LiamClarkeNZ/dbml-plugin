@@ -4,6 +4,7 @@ import { tableNodeId } from "../transform";
 
 export interface Hull {
   name: string;
+  colour?: string;
   x: number;
   y: number;
   width: number;
@@ -14,6 +15,8 @@ export function computeHulls(
   groups: GroupModel[],
   nodes: FlowNode[],
   pad = 16,
+  // The label chip sits inside the hull, so the top needs room the other sides do not.
+  padTop = 28,
 ): Hull[] {
   const byId = new Map(nodes.map((n) => [n.id, n]));
   const hulls: Hull[] = [];
@@ -38,10 +41,11 @@ export function computeHulls(
     }
     hulls.push({
       name: group.name,
+      colour: group.color,
       x: minX - pad,
-      y: minY - pad,
+      y: minY - padTop,
       width: maxX - minX + pad * 2,
-      height: maxY - minY + pad * 2,
+      height: maxY - minY + padTop + pad,
     });
   }
   return hulls;
