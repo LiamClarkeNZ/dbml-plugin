@@ -10,7 +10,14 @@ const ENDS: Record<Cardinality, { start: End; end: End }> = {
   MANY_TO_MANY: { start: "many", end: "many" },
 };
 
-const ref = (end: End): string => `url(#dbml-${end})`;
+/**
+ * Marker element ids, shared with MarkerDefs so a reference cannot drift from its definition.
+ * These must stay bare ids: React Flow builds the reference itself as `url('#' + markerEnd)` for
+ * string markers, so passing a pre-wrapped `url(#id)` yields `url('#url(#id)')` and paints nothing.
+ */
+export const MARKER_IDS = { one: "dbml-one", many: "dbml-many" } as const;
+
+const ref = (end: End): string => MARKER_IDS[end];
 
 export function edgeMarkers(cardinality: Cardinality): {
   markerStart: string;

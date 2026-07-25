@@ -1,9 +1,11 @@
+import { MARKER_IDS } from "./cardinality";
+
 export function MarkerDefs() {
   return (
     <svg style={{ position: "absolute", width: 0, height: 0 }} aria-hidden="true">
       <defs>
         <marker
-          id="dbml-one"
+          id={MARKER_IDS.one}
           viewBox="0 0 12 12"
           refX="10"
           refY="6"
@@ -14,7 +16,7 @@ export function MarkerDefs() {
           <path className="dbml-marker" d="M6,1 L6,11" />
         </marker>
         <marker
-          id="dbml-many"
+          id={MARKER_IDS.many}
           viewBox="0 0 12 12"
           refX="10"
           refY="6"
