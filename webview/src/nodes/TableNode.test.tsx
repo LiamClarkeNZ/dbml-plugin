@@ -76,4 +76,11 @@ describe("TableNode", () => {
     expect(header.style.background).toBe("");
     expect(header.style.color).toBe("");
   });
+
+  it("labels badges with their full constraint name", () => {
+    renderNode();
+    const pk = document.querySelector('[title="PRIMARY KEY"]') as HTMLElement;
+    expect(pk.textContent).toBe("PK");
+    expect(document.querySelector('[title="AUTO INCREMENT"]')).not.toBeNull();
+  });
 });
