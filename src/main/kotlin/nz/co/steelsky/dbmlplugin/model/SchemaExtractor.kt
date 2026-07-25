@@ -3,6 +3,7 @@ package nz.co.steelsky.dbmlplugin.model
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiErrorElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.tree.IElementType
 import com.intellij.psi.tree.TokenSet
 import com.intellij.psi.util.PsiTreeUtil
 import nz.co.steelsky.dbmlplugin.psi.DbmlColumnDefinition
@@ -47,6 +48,12 @@ object SchemaExtractor {
     private fun PsiElement.colourCode(): String? =
         node.findChildByType(DbmlTypes.COLOR_CODE)?.text
 
+    /** The normalised colour carried by whichever setting in this list has the given flag token, or null. */
+    private fun List<PsiElement>?.colourOf(flag: IElementType): String? =
+        this?.firstOrNull { it.node.findChildByType(flag) != null }
+            ?.colourCode()
+            ?.let(::normaliseColour)
+
     fun extract(file: PsiFile): SchemaModel {
         val tables = PsiTreeUtil.getChildrenOfTypeAsList(file, DbmlTableDefinition::class.java)
             .map(::extractTable)
@@ -72,10 +79,7 @@ object SchemaExtractor {
             columns = columns,
             indexes = t.indexesDefinitionList.flatMap { it.indexDefinitionList }.map(::extractIndex),
             sourceOffset = (nameEl ?: t).textRange.startOffset,
-            headerColor = t.tableSettings?.tableSettingList
-                ?.firstOrNull { it.node.findChildByType(DbmlTypes.HEADERCOLOR) != null }
-                ?.colourCode()
-                ?.let(::normaliseColour),
+            headerColor = t.tableSettings?.tableSettingList.colourOf(DbmlTypes.HEADERCOLOR),
         )
     }
 
@@ -153,10 +157,7 @@ object SchemaExtractor {
                     relText = body.relation.text,
                     resolver = resolver,
                     offset = refDef.textRange.startOffset,
-                    colour = body.refSettings?.refSettingList
-                        ?.firstOrNull { it.node.findChildByType(DbmlTypes.COLOR) != null }
-                        ?.colourCode()
-                        ?.let(::normaliseColour),
+                    colour = body.refSettings?.refSettingList.colourOf(DbmlTypes.COLOR),
                 ),
             )
         }
@@ -254,10 +255,7 @@ object SchemaExtractor {
         name = groupName(g),
         tableKeys = g.tableGroupEntryList.map { normalize(it.tableName.text) },
         sourceOffset = g.textRange.startOffset,
-        color = g.tableGroupSettings?.tableGroupSettingList
-            ?.firstOrNull { it.node.findChildByType(DbmlTypes.COLOR) != null }
-            ?.colourCode()
-            ?.let(::normaliseColour),
+        color = g.tableGroupSettings?.tableGroupSettingList.colourOf(DbmlTypes.COLOR),
     )
 
     private fun groupName(g: DbmlTableGroup): String =
