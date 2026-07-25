@@ -1,5 +1,6 @@
 import { Handle, type NodeProps, Position } from "@xyflow/react";
 import type { Node } from "@xyflow/react";
+import { readableInkOn } from "../colour";
 import type { TableNodeData } from "../transform";
 import "./nodes.css";
 
@@ -7,10 +8,14 @@ type Props = NodeProps<Node<TableNodeData, "table">>;
 
 export default function TableNode({ data }: Props) {
   const { table } = data;
+  const headerStyle = table.headerColor
+    ? { background: table.headerColor, color: readableInkOn(table.headerColor) }
+    : undefined;
   return (
     <div className="dbml-node">
       <div
         className="dbml-node__header"
+        style={headerStyle}
         data-kind="table"
         data-offset={table.sourceOffset}
         title={table.note}

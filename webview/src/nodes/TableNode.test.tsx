@@ -20,8 +20,8 @@ const users: TableModel = {
 
 // The component only reads `data`; build props via ComponentProps to avoid
 // enumerating the full NodeProps surface (which varies across @xyflow versions).
-function renderNode() {
-  const props = { data: { table: users } } as unknown as ComponentProps<typeof TableNode>;
+function renderNode(table: typeof users = users) {
+  const props = { data: { table } } as unknown as ComponentProps<typeof TableNode>;
   return render(
     <ReactFlowProvider>
       <TableNode {...props} />
@@ -60,5 +60,20 @@ describe("TableNode", () => {
     const idx = screen.getByText("id, email");
     expect(idx).toBeInTheDocument();
     expect(idx.closest("[data-kind='index']")!.textContent).toContain("U");
+  });
+
+  it("tints the header with the author's colour and picks readable ink", () => {
+    const table = { ...users, headerColor: "#b19888" };
+    renderNode(table);
+    const header = document.querySelector(".dbml-node__header") as HTMLElement;
+    expect(header.style.background).toBe("rgb(177, 152, 136)");
+    expect(header.style.color).toBe("rgb(26, 26, 26)");
+  });
+
+  it("leaves the header themed when no colour is set", () => {
+    renderNode(users);
+    const header = document.querySelector(".dbml-node__header") as HTMLElement;
+    expect(header.style.background).toBe("");
+    expect(header.style.color).toBe("");
   });
 });
