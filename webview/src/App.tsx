@@ -5,6 +5,7 @@ import {
   MiniMap,
   ReactFlow,
   ReactFlowProvider,
+  useReactFlow,
   ViewportPortal,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -179,14 +180,31 @@ function Diagram() {
   }, []);
 
   const clearHighlight = useCallback(() => setHighlight(EMPTY_HIGHLIGHT), []);
+  const { zoomIn, zoomOut, fitView } = useReactFlow();
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setHighlight(EMPTY_HIGHLIGHT);
+      if (e.key === "Escape") {
+        setHighlight(EMPTY_HIGHLIGHT);
+        return;
+      }
+      // Zoom is deliberately keyboard- and button-only; see PAN_ON_SCROLL_SPEED above for why no
+      // gesture drives it.
+      if (!e.metaKey && !e.ctrlKey) return;
+      if (e.key === "=" || e.key === "+") {
+        e.preventDefault();
+        zoomIn();
+      } else if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        zoomOut();
+      } else if (e.key === "0") {
+        e.preventDefault();
+        fitView();
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [zoomIn, zoomOut, fitView]);
 
   const {
     tip,
@@ -217,7 +235,7 @@ function Diagram() {
           zoomOnScroll={false}
           panOnScroll
           panOnScrollSpeed={PAN_ON_SCROLL_SPEED}
-          zoomOnPinch
+          zoomOnPinch={false}
           fitView
           proOptions={{ hideAttribution: true }}
         >

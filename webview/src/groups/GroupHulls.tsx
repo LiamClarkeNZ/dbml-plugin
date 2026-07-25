@@ -6,8 +6,13 @@ export function GroupHulls({ hulls }: { hulls: Hull[] }) {
       {hulls.map((h) => (
         <div
           key={h.name}
+          data-group-hull=""
           style={{
             position: "absolute",
+            // Behind the nodes. ViewportPortal inserts its children after React Flow's node layer,
+            // so without this the translucent fill washes over every table inside the group and
+            // clips the ones it overlaps. React Flow's own Background uses the same z-index.
+            zIndex: -1,
             transform: `translate(${h.x}px, ${h.y}px)`,
             width: h.width,
             height: h.height,
