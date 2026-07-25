@@ -45,6 +45,16 @@ describe("computeHulls", () => {
     expect(hull.width).toBe(240 + 56);
   });
 
+  it("paints larger hulls first so a nested group is not washed over by its parent", () => {
+    const nodes = [node("a", 0, 0), node("b", 400, 400)];
+    const groups: GroupModel[] = [
+      { name: "catalogue", tableKeys: ["b"], sourceOffset: 0 },
+      { name: "core", tableKeys: ["a", "b"], sourceOffset: 0 },
+    ];
+    // Declaration order puts the small group first; area order must override it.
+    expect(computeHulls(groups, nodes).map((h) => h.name)).toEqual(["core", "catalogue"]);
+  });
+
   it("carries the group colour through", () => {
     const nodes = [
       { id: "users", type: "table", position: { x: 0, y: 0 }, width: 240, height: 80, data: {} },

@@ -1,5 +1,6 @@
 import {
   Background,
+  ControlButton,
   Controls,
   MiniMap,
   ReactFlow,
@@ -78,6 +79,7 @@ function Diagram() {
   const groupsRef = useRef<SchemaModel["groups"]>([]);
   const schemaRef = useRef<SchemaModel | null>(null);
   const [highlight, setHighlight] = useState<Highlight>(EMPTY_HIGHLIGHT);
+  const [showMiniMap, setShowMiniMap] = useState(true);
 
   const doRender = useCallback(async (json: string, hash: string) => {
     let schema: SchemaModel;
@@ -203,8 +205,28 @@ function Diagram() {
           proOptions={{ hideAttribution: true }}
         >
           <Background />
-          <Controls />
-          <MiniMap pannable zoomable />
+          <Controls>
+            <ControlButton
+              onClick={() => setShowMiniMap((shown) => !shown)}
+              data-tip={showMiniMap ? "Hide the minimap" : "Show the minimap"}
+              aria-label={showMiniMap ? "Hide the minimap" : "Show the minimap"}
+            >
+              <svg viewBox="0 0 12 12" aria-hidden="true">
+                <rect
+                  x="1"
+                  y="1"
+                  width="10"
+                  height="10"
+                  rx="1"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.2"
+                />
+                <rect x="6.5" y="6.5" width="4" height="4" fill="currentColor" />
+              </svg>
+            </ControlButton>
+          </Controls>
+          {showMiniMap ? <MiniMap pannable zoomable /> : null}
           <ViewportPortal>
             <GroupHulls hulls={state.hulls} />
           </ViewportPortal>

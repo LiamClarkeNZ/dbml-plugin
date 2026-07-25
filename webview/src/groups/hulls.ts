@@ -49,5 +49,7 @@ export function computeHulls(
       height: maxY - minY + padTop + pad,
     });
   }
-  return hulls;
+  // Hulls are translucent and stack in DOM order, so a group whose bounding box encloses another
+  // would paint over it. Largest first puts the enclosing group behind the one it contains.
+  return hulls.sort((a, b) => b.width * b.height - a.width * a.height);
 }
