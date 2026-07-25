@@ -131,7 +131,7 @@ function Diagram() {
         return;
       }
 
-      const positioned = await layout(nodes, styledEdges);
+      const positioned = await layout(nodes, styledEdges, schema.groups);
       lastHash.current = hash;
       setState({
         nodes: positioned,

@@ -11,13 +11,19 @@ export interface Hull {
   height: number;
 }
 
+/** Side/bottom padding around a group's member nodes. Shared with layout.ts so the ELK
+ * parent node sizing (`elk.padding`) stays consistent with what the hull actually draws. */
+export const HULL_PAD = 28;
+/** The label chip sits inside the hull, so the top needs a band of its own: enough for the chip
+ * plus clear space, otherwise the chip reads as sitting on top of the first table. Shared with
+ * layout.ts for the same reason as HULL_PAD. */
+export const HULL_PAD_TOP = 48;
+
 export function computeHulls(
   groups: GroupModel[],
   nodes: FlowNode[],
-  pad = 28,
-  // The label chip sits inside the hull, so the top needs a band of its own: enough for the chip
-  // plus clear space, otherwise the chip reads as sitting on top of the first table.
-  padTop = 48,
+  pad = HULL_PAD,
+  padTop = HULL_PAD_TOP,
 ): Hull[] {
   const byId = new Map(nodes.map((n) => [n.id, n]));
   const hulls: Hull[] = [];
