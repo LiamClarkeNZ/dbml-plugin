@@ -21,6 +21,7 @@ import "./theme.css";
 import { MarkerDefs } from "./edges/markers";
 import { applyEdgeStyling, withHighlight } from "./edges/cardinality";
 import { customTokens } from "./edges/markerVariants";
+import StubEdge from "./edges/StubEdge";
 import { GroupHulls } from "./groups/GroupHulls";
 import { computeHulls, type Hull } from "./groups/hulls";
 import { HighlightContext } from "./highlight";
@@ -42,6 +43,8 @@ declare global {
     __dbmlReady?: boolean;
   }
 }
+
+const edgeTypes = { stub: StubEdge };
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -180,6 +183,7 @@ function Diagram() {
           nodes={state.nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           onEdgeClick={onEdgeClick}
           onPaneClick={clearHighlight}
           fitView

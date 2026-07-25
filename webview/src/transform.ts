@@ -77,6 +77,7 @@ export function toFlow(schema: SchemaModel): FlowData {
       sourceHandle,
       target: r.toTable,
       targetHandle,
+      type: "stub",
       data: { cardinality: r.cardinality, kind: "relation", colour: r.color },
     });
   }
@@ -89,6 +90,7 @@ export function toFlow(schema: SchemaModel): FlowData {
           source: table.key,
           sourceHandle: columnHandleId(col.name),
           target: enumNodeId(col.type),
+          type: "stub",
           data: { cardinality: "MANY_TO_ONE", kind: "enum" },
         });
       }
