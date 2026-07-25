@@ -8,6 +8,7 @@ export const CSS_VARS = [
   "--dbml-badge-bg",
   "--dbml-badge-fg",
   "--dbml-edge",
+  "--dbml-accent",
   "--dbml-font",
 ] as const;
 
@@ -23,6 +24,7 @@ export const LIGHT_THEME: Record<string, string> = {
   "--dbml-badge-bg": "#dbe4f0",
   "--dbml-badge-fg": "#26456e",
   "--dbml-edge": "#6b7280",
+  "--dbml-accent": "#26456e",
   "--dbml-font": "monospace",
 };
 
@@ -36,6 +38,7 @@ export const DARK_THEME: Record<string, string> = {
   "--dbml-badge-bg": "#3b4a5f",
   "--dbml-badge-fg": "#a9c7ee",
   "--dbml-edge": "#8b909a",
+  "--dbml-accent": "#a9c7ee",
   "--dbml-font": "monospace",
 };
 

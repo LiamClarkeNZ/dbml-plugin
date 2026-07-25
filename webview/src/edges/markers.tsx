@@ -1,4 +1,4 @@
-import { type ColourToken, DEFAULT_TOKEN, markerId } from "./markerVariants";
+import { type ColourToken, DEFAULT_TOKEN, HIGHLIGHT_TOKEN, markerId } from "./markerVariants";
 
 const MARKER_PATHS = { one: "M6,1 L6,11", many: "M11,1 L1,6 L11,11" } as const;
 
@@ -30,6 +30,7 @@ export function MarkerDefs({ tokens = [] }: { tokens?: ColourToken[] }) {
     <svg style={{ position: "absolute", width: 0, height: 0 }} aria-hidden="true">
       <defs>
         <MarkerPair token={DEFAULT_TOKEN} />
+        <MarkerPair token={HIGHLIGHT_TOKEN} />
         {tokens.map((token) => (
           <MarkerPair key={markerId("one", token)} token={token} />
         ))}

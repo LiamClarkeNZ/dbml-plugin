@@ -16,3 +16,4 @@
    in CSS property values, so a presentation attribute leaves stroke at its initial "none". */
 .dbml-marker { stroke-width: 1.5; fill: none; }
 .dbml-marker--default { stroke: var(--dbml-edge); }
+.dbml-marker--highlight { stroke: var(--dbml-accent); }
