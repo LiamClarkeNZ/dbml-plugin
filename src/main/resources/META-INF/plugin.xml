@@ -1,8 +1,8 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>nz.co.steelsky.dbmlplugin</id>
+    <id>ch.tibatob.dbmlplugin</id>
     <name>DBML</name>
-    <vendor url="https://github.com/LiamClarkeNZ/dbml-plugin" email="liam@steelsky.co.nz">steelsky</vendor>
+    <vendor url="https://github.com/tibatob/dbml-plugin">tibatob</vendor>
 
     <depends>com.intellij.modules.platform</depends>
 

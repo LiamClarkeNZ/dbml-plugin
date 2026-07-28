@@ -2,6 +2,13 @@
 
 # dbml-plugin Changelog
 
+## [0.2.0]
+### Added
+- Support for keywords 'check' and 'checks'
+
+### Fixed
+- Index settings combining `pk` (or `primary key`) with other settings, e.g. `[pk, name: 'users_pk']`, are no longer reported as syntax errors
+
 ## [0.1.0]
 ### Added
 - DBML language recognition for `.dbml` files across all JetBrains IDEs
