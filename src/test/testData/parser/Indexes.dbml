@@ -5,8 +5,10 @@ Table users {
 
   indexes {
     id [pk]
+    id [pk, name: 'users_pk']
     (name, email) [unique, name: 'name_email_idx']
     (name, email) [unique, pk]
+    (id, name) [primary key, name: 'users_pkey']
     email [type: btree]
   }
 }
