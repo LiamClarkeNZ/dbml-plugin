@@ -69,6 +69,8 @@ class DbmlTokenType(debugName: String) : IElementType(debugName, DbmlLanguage) {
             "SET" to "'set'",
             "NO" to "'no'",
             "ACTION" to "'action'",
+            "CHECK" to "'check'",
+            "CHECKS" to "'checks'",
         )
     }
 }

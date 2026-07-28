@@ -40,6 +40,8 @@
     SET="SET"
     NO="NO"
     ACTION="ACTION"
+    CHECK="CHECK"
+    CHECKS="CHECKS"
     MINUS="MINUS"
     LT="LT"
     GT="GT"
@@ -85,7 +87,7 @@ private identifier_ ::= LITERAL | DOUBLE_QUOTED_STRING
                        | NAME | TYPE | NOTE | DEFAULT | KEY | PK | NULL | NOT
                        | UNIQUE | INCREMENT | PRIMARY | INDEXES | BTREE | HASH
                        | DELETE | UPDATE | CASCADE | RESTRICT | SET | NO | ACTION
-                       | HEADERCOLOR | COLOR | AS
+                       | HEADERCOLOR | COLOR | AS | CHECK | CHECKS
 table_name ::= identifier_ (DOT identifier_)?
 private string_literal_ ::= SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING | triple_quoted_string
 triple_quoted_string ::= TRIPLE_STRING_OPEN (TRIPLE_STRING_CONTENT | STRING_ESCAPE | NEWLINE)* TRIPLE_STRING_CLOSE {pin=1}
@@ -104,7 +106,7 @@ table_settings ::= LBRACK table_setting (COMMA table_setting)* RBRACK {pin=1}
 table_setting ::= HEADERCOLOR COLON COLOR_CODE | NOTE COLON string_literal_
 // Order matters: indexes_definition, table_note, and table_partial_ref must be tried
 // BEFORE column_definition, because identifier_ now matches keywords like NOTE, INDEXES, etc.
-private table_body ::= (indexes_definition | table_note | table_partial_ref | column_definition | nl_)*
+private table_body ::= (indexes_definition | checks_definition | table_note | table_partial_ref | column_definition | nl_)*
 private table_note ::= NOTE note_value
 table_partial_ref ::= TILDE identifier_
 
@@ -115,7 +117,7 @@ private datatype_param ::= LITERAL | NUMBER
 column_settings ::= LBRACK column_setting (COMMA column_setting)* RBRACK {pin=1}
 column_setting ::= not_null_setting | null_setting | primary_key_setting | pk_setting
                  | unique_setting | increment_setting | default_setting
-                 | column_note_setting | column_inline_ref
+                 | column_note_setting | check_setting | column_inline_ref
 private not_null_setting ::= NOT NULL
 private null_setting ::= NULL
 private primary_key_setting ::= PRIMARY KEY
@@ -124,6 +126,7 @@ private unique_setting ::= UNIQUE
 private increment_setting ::= INCREMENT
 private default_setting ::= DEFAULT COLON (string_literal_ | EXPRESSION | LITERAL | NUMBER)
 private column_note_setting ::= NOTE COLON string_literal_
+private check_setting ::= CHECK COLON EXPRESSION
 column_inline_ref ::= REF identifier_? COLON relation ref_column_names
 
 // === Ref ===
@@ -152,7 +155,8 @@ enum_value_settings ::= LBRACK enum_value_setting (COMMA enum_value_setting)* RB
 private enum_value_setting ::= NOTE COLON string_literal_
 
 // === Indexes ===
-indexes_definition ::= INDEXES LBRACE indexes_body RBRACE {pin=1}
+// pin=2 (after LBRACE): allow `indexes` to be used as a column name when a datatype follows.
+indexes_definition ::= INDEXES LBRACE indexes_body RBRACE {pin=2}
 private indexes_body ::= (index_definition | nl_)*
 index_definition ::= (index_composite | index_single) index_settings? {pin=1}
 private index_composite ::= LPAREN index_column (COMMA index_column)* RPAREN
@@ -168,6 +172,16 @@ private index_unique_setting ::= UNIQUE
 private index_name_setting ::= NAME COLON string_literal_
 private index_type_setting ::= TYPE COLON (BTREE | HASH)
 private index_note_setting ::= NOTE COLON string_literal_
+
+// === Checks ===
+// pin=2 (after LBRACE): allow `checks` to be used as a column name when a datatype follows.
+checks_definition ::= CHECKS LBRACE checks_body RBRACE {pin=2}
+private checks_body ::= (check_definition | nl_)*
+check_definition ::= EXPRESSION check_constraint_settings? {pin=1}
+check_constraint_settings ::= LBRACK check_constraint_setting (COMMA check_constraint_setting)* RBRACK {pin=1}
+check_constraint_setting ::= check_name_setting | check_note_setting
+private check_name_setting ::= NAME COLON string_literal_
+private check_note_setting ::= NOTE COLON string_literal_
 
 // === Table Group ===
 table_group ::= TABLEGROUP identifier_ table_group_settings? LBRACE table_group_body RBRACE {pin=1}
