@@ -2,6 +2,18 @@
 
 # dbml-plugin Changelog
 
+## [Unreleased]
+### Added
+- Live entity-relationship diagram preview for `.dbml` files, shown in a split editor alongside the source
+- Diagram updates as you type
+- Tables, enums, and table groups, with relations drawn as edges carrying cardinality markers
+- Column badges for primary key, auto increment, unique, and not null, with full-name tooltips
+- Click a table, column, or enum to jump to its definition in the source
+- Click a column to highlight every relation that touches it, or click a relation to highlight it alone
+- DBML colour settings are honoured: table `headercolor`, table group `color`, and ref `color`
+- Diagram follows the editor colour scheme and font
+- Pan by scrolling, zoom with the toolbar buttons or keyboard, and toggle the minimap
+
 ## [0.1.0]
 ### Added
 - DBML language recognition for `.dbml` files across all JetBrains IDEs

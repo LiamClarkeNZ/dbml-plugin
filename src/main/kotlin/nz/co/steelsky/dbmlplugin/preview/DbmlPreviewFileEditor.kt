@@ -50,7 +50,7 @@ class DbmlPreviewFileEditor(
                 handleNavigate(payload)
                 null
             }
-            val readyQuery = JBCefJSQuery.create(b)
+            val readyQuery = JBCefJSQuery.create(b as JBCefBrowserBase)
             readyQuery.addHandler {
                 pushRender()
                 pushTheme()
