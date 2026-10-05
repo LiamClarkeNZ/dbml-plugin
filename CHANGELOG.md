@@ -3,7 +3,11 @@
 # dbml-plugin Changelog
 
 ## [Unreleased]
+
+## [0.2.0] - 2026-10-05
+
 ### Added
+
 - Live entity-relationship diagram preview for `.dbml` files, shown in a split editor alongside the source
 - Diagram updates as you type
 - Tables, enums, and table groups, with relations drawn as edges carrying cardinality markers
@@ -15,7 +19,9 @@
 - Pan by scrolling, zoom with the toolbar buttons or keyboard, and toggle the minimap
 
 ## [0.1.0]
+
 ### Added
+
 - DBML language recognition for `.dbml` files across all JetBrains IDEs
 - Syntax highlighting for keywords, strings, numbers, comments, operators, colour codes, and expressions
 - Escape sequence highlighting in multi-line (triple-quoted) strings
@@ -26,3 +32,7 @@
 - Brace matching and auto-close for `{}`, `[]`, `()`
 - Line (`//`) and block (`/* */`) comment toggling
 - DBML file type icon
+
+[Unreleased]: https://github.com/LiamClarkeNZ/dbml-plugin/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/LiamClarkeNZ/dbml-plugin/compare/0.1.0...0.2.0
+[0.1.0]: https://github.com/LiamClarkeNZ/dbml-plugin/commits/0.1.0
