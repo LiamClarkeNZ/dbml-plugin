@@ -35,6 +35,9 @@ sourceSets {
 node {
     download.set(false) // use Node from PATH (local dev + CI setup-node)
     nodeProjectDir.set(file("webview"))
+    // `npm ci` never rewrites the lockfile, so a CI npm older than the local one cannot leave
+    // lockfile drift for the release workflow's `git commit -am` to pick up.
+    npmInstallCommand.set("ci")
 }
 
 val buildWebview by tasks.registering(NpmTask::class) {
