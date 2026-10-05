@@ -64,6 +64,17 @@ tasks.named<ProcessResources>("processResources") {
     dependsOn(bundleWebview)
 }
 
+val testWebview by tasks.registering(NpmTask::class) {
+    group = "verification"
+    description = "Runs the webview Vitest suite."
+    dependsOn(tasks.named("npmInstall"))
+    args.set(listOf("run", "test"))
+}
+
+tasks.named("check") {
+    dependsOn(testWebview)
+}
+
 // Configure project's dependencies
 repositories {
     mavenCentral()
