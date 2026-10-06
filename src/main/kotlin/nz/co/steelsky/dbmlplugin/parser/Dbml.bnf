@@ -110,7 +110,7 @@ table_partial_ref ::= TILDE identifier_
 
 // === Column ===
 column_definition ::= identifier_ column_datatype column_settings? {pin=1}
-column_datatype ::= identifier_ (LPAREN datatype_param (COMMA datatype_param)* RPAREN)?
+column_datatype ::= identifier_ (DOT identifier_)? (LPAREN datatype_param (COMMA datatype_param)* RPAREN)?
 private datatype_param ::= LITERAL | NUMBER
 column_settings ::= LBRACK column_setting (COMMA column_setting)* RBRACK {pin=1}
 column_setting ::= not_null_setting | null_setting | primary_key_setting | pk_setting

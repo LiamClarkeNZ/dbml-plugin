@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Schema-qualified column types such as `customer.some_enum` no longer report a syntax error ([#39](https://github.com/LiamClarkeNZ/dbml-plugin/issues/39))
+
 ## [0.2.0] - 2026-10-05
 
 ### Added
