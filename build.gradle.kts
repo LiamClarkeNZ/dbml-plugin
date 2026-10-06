@@ -40,7 +40,7 @@ node {
     npmInstallCommand.set("ci")
 }
 
-val buildWebview by tasks.registering(NpmTask::class) {
+val buildWebview = tasks.register<NpmTask>("buildWebview") {
     group = "build"
     description = "Builds the visualisation webview bundle (webview/dist/index.html)."
     dependsOn(tasks.named("npmInstall"))
@@ -55,7 +55,7 @@ val buildWebview by tasks.registering(NpmTask::class) {
 // Separate Copy task: a plain `copy {}` closure in a doLast captures a Gradle
 // script reference, which the configuration cache disallows. A typed Copy task
 // is configuration-cache safe.
-val bundleWebview by tasks.registering(Copy::class) {
+val bundleWebview = tasks.register<Copy>("bundleWebview") {
     group = "build"
     description = "Copies the built webview into plugin resources."
     dependsOn(buildWebview)
@@ -67,7 +67,7 @@ tasks.named<ProcessResources>("processResources") {
     dependsOn(bundleWebview)
 }
 
-val testWebview by tasks.registering(NpmTask::class) {
+val testWebview = tasks.register<NpmTask>("testWebview") {
     group = "verification"
     description = "Runs the webview Vitest suite."
     dependsOn(tasks.named("npmInstall"))
