@@ -41,6 +41,17 @@ number ('3.14')"""
         )
     }
 
+    fun testExponentNumbers() {
+        doTest(
+            "1.5e10 2E-3 7e+2",
+            """number ('1.5e10')
+WHITE_SPACE (' ')
+number ('2E-3')
+WHITE_SPACE (' ')
+number ('7e+2')"""
+        )
+    }
+
     fun testComments() {
         doTest(
             "// line comment\n/* block */",

@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Data sample `Records` blocks, inside or outside a table, including the `[example]` setting ([#37](https://github.com/LiamClarkeNZ/dbml-plugin/issues/37))
+
 ### Fixed
 
 - Schema-qualified column types such as `customer.some_enum` no longer report a syntax error ([#39](https://github.com/LiamClarkeNZ/dbml-plugin/issues/39))

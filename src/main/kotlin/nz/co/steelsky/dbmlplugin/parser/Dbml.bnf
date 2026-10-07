@@ -13,6 +13,7 @@
     PROJECT="PROJECT"
     TABLE="TABLE"
     RECORDS="RECORDS"
+    EXAMPLE="EXAMPLE"
     AS="AS"
     REF="REF"
     ENUM="ENUM"
@@ -86,7 +87,7 @@ private identifier_ ::= LITERAL | DOUBLE_QUOTED_STRING
                        | NAME | TYPE | NOTE | DEFAULT | KEY | PK | NULL | NOT
                        | UNIQUE | INCREMENT | PRIMARY | INDEXES | BTREE | HASH
                        | DELETE | UPDATE | CASCADE | RESTRICT | SET | NO | ACTION
-                       | HEADERCOLOR | COLOR | AS
+                       | HEADERCOLOR | COLOR | AS | RECORDS | EXAMPLE
 table_name ::= identifier_ (DOT identifier_)?
 private string_literal_ ::= SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING | triple_quoted_string
 triple_quoted_string ::= TRIPLE_STRING_OPEN (TRIPLE_STRING_CONTENT | STRING_ESCAPE | NEWLINE)* TRIPLE_STRING_CLOSE {pin=1}
@@ -188,10 +189,16 @@ named_note ::= NOTE identifier_ LBRACE string_literal_ RBRACE {pin=1}
 note_value ::= COLON string_literal_ | LBRACE string_literal_ RBRACE
 
 // === Records ===
-records_definition ::= RECORDS table_name records_config {pin=1}
-table_records ::= RECORDS records_config {pin=1}
-private records_config ::= (LPAREN records_column_list RPAREN)? LBRACE records_body RBRACE
-private records_column_list ::= identifier_ (COMMA identifier_)*
-private records_body ::= (records_row | nl_)*
+// Outside a table the column list is required; inside, it defaults to every column in order.
+records_definition ::= RECORDS table_name records_columns records_settings? records_block {pin=1}
+// The lookahead lets `records int` fall through to column_definition.
+table_records ::= RECORDS &(LPAREN | LBRACK | LBRACE) records_columns? records_settings? records_block {pin=2}
+private records_columns ::= LPAREN identifier_ (COMMA identifier_)* RPAREN
+records_settings ::= LBRACK records_setting (COMMA records_setting)* RBRACK {pin=1}
+records_setting ::= EXAMPLE
+private records_block ::= LBRACE records_body RBRACE
+private records_body ::= (records_line | nl_)*
+private records_line ::= records_row (nl_ | &RBRACE) {pin=1}
+// An empty field between commas is null.
 records_row ::= records_value (COMMA records_value?)* {pin=1}
 records_value ::= MINUS NUMBER | string_literal_ | NUMBER | EXPRESSION | NULL | identifier_ (DOT identifier_)*

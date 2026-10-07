@@ -30,7 +30,7 @@ NEWLINE_CHAR = [\n\r]
 
 // Composite patterns
 INTEGER = {DIGIT}+
-NUMBER = {INTEGER} ("." {INTEGER})?
+NUMBER = {INTEGER} ("." {INTEGER})? ([eE] [+-]? {INTEGER})?
 WORD = {WORD_CHAR}+
 COLOR_CODE_BODY = {HEX_DIGIT}{6} | {HEX_DIGIT}{3}
 
@@ -91,6 +91,7 @@ COLOR_CODE_BODY = {HEX_DIGIT}{6} | {HEX_DIGIT}{3}
     [Pp][Rr][Oo][Jj][Ee][Cc][Tt]                                { return PROJECT; }
     [Pp][Rr][Ii][Mm][Aa][Rr][Yy]                                { return PRIMARY; }
     [Ii][Nn][Dd][Ee][Xx][Ee][Ss]                                { return INDEXES; }
+    [Ee][Xx][Aa][Mm][Pp][Ll][Ee]                                { return EXAMPLE; }
     [Rr][Ee][Cc][Oo][Rr][Dd][Ss]                                { return RECORDS; }
     [Uu][Nn][Ii][Qq][Uu][Ee]                                    { return UNIQUE; }
     [Dd][Ee][Ll][Ee][Tt][Ee]                                    { return DELETE; }
