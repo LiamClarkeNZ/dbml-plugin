@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-07
+
 ### Fixed
 
 - Schema-qualified column types such as `customer.some_enum` no longer report a syntax error ([#39](https://github.com/LiamClarkeNZ/dbml-plugin/issues/39))
@@ -37,6 +39,7 @@
 - Line (`//`) and block (`/* */`) comment toggling
 - DBML file type icon
 
-[Unreleased]: https://github.com/LiamClarkeNZ/dbml-plugin/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/LiamClarkeNZ/dbml-plugin/compare/0.2.1...HEAD
+[0.2.1]: https://github.com/LiamClarkeNZ/dbml-plugin/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/LiamClarkeNZ/dbml-plugin/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/LiamClarkeNZ/dbml-plugin/commits/0.1.0
