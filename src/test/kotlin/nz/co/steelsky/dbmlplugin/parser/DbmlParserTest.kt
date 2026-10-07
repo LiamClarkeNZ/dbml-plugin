@@ -36,6 +36,10 @@ class DbmlParserTest : ParsingTestCase("", "dbml", DbmlParserDefinition()) {
         doTest(true)
     }
 
+    fun testSchemaQualifiedColumnType() {
+        doTest(true, true)
+    }
+
     fun testInvalidSyntax() {
         doTest(true)
     }

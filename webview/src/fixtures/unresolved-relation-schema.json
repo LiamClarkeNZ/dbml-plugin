@@ -1,0 +1,19 @@
+{
+  "tables": [
+    {
+      "key": "posts",
+      "name": "posts",
+      "columns": [
+        { "name": "a", "type": "int", "pk": false, "unique": false, "notNull": false, "increment": false, "sourceOffset": 10 }
+      ],
+      "indexes": [],
+      "sourceOffset": 0
+    }
+  ],
+  "enums": [],
+  "relations": [
+    { "fromTable": "posts", "fromColumns": ["a"], "toTable": "missing", "toColumns": ["x"], "cardinality": "ONE_TO_MANY", "resolved": false, "sourceOffset": 30 }
+  ],
+  "groups": [],
+  "parseErrorCount": 0
+}
