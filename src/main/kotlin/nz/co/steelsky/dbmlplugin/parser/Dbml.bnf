@@ -181,7 +181,7 @@ private table_group_note ::= NOTE note_value
 table_partial ::= TABLEPARTIAL identifier_ table_settings? LBRACE table_body RBRACE {pin=1}
 
 // === Named Note ===
-named_note ::= NOTE identifier_ LBRACE string_literal_ RBRACE {pin=1}
+named_note ::= NOTE identifier_ note_value {pin=1}
 
 // === Note (shared) ===
-note_value ::= COLON string_literal_ | LBRACE string_literal_ RBRACE
+note_value ::= (COLON string_literal_) | (LBRACE nl_? string_literal_ nl_? RBRACE)
