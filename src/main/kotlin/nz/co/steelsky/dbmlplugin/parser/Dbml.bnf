@@ -122,7 +122,7 @@ private primary_key_setting ::= PRIMARY KEY
 private pk_setting ::= PK
 private unique_setting ::= UNIQUE
 private increment_setting ::= INCREMENT
-private default_setting ::= DEFAULT COLON (string_literal_ | EXPRESSION | LITERAL | NUMBER)
+private default_setting ::= DEFAULT COLON (string_literal_ | EXPRESSION | LITERAL | NUMBER | NULL)
 private column_note_setting ::= NOTE COLON string_literal_
 column_inline_ref ::= REF identifier_? COLON relation ref_column_names
 
