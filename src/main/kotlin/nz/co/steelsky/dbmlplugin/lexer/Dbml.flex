@@ -88,6 +88,8 @@ COLOR_CODE_BODY = {HEX_DIGIT}{6} | {HEX_DIGIT}{3}
     [Rr][Ee][Ss][Tt][Rr][Ii][Cc][Tt]                            { return RESTRICT; }
     [Dd][Ee][Ff][Aa][Uu][Ll][Tt]                                { return DEFAULT; }
     [Cc][Aa][Ss][Cc][Aa][Dd][Ee]                                { return CASCADE; }
+    [Cc][Hh][Ee][Cc][Kk][Ss]                                    { return CHECKS; }
+    [Cc][Hh][Ee][Cc][Kk]                                        { return CHECK; }
     [Pp][Rr][Oo][Jj][Ee][Cc][Tt]                                { return PROJECT; }
     [Pp][Rr][Ii][Mm][Aa][Rr][Yy]                                { return PRIMARY; }
     [Ii][Nn][Dd][Ee][Xx][Ee][Ss]                                { return INDEXES; }

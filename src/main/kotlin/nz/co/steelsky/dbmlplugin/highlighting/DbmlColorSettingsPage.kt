@@ -39,10 +39,15 @@ Table users as U [headercolor: #3498db] {
   id integer [pk, increment]
   name varchar(255) [not null]
   email varchar [unique, default: `gen_random_uuid()`]
+  age integer [check: `age >= 0`]
 
   indexes {
     email [type: btree]
     (name, email) [unique, name: 'idx_name_email']
+  }
+
+  checks {
+    `char_length(name) > 3` [name: 'chk_name_min_lenght']
   }
 
   Note: '''

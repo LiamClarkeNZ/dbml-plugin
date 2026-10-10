@@ -134,4 +134,31 @@ string content ('end')
             "expression ('`now()`')"
         )
     }
+
+    fun testCheckKeywords() {
+        doTest(
+            "check checks",
+            """'check' ('check')
+WHITE_SPACE (' ')
+'checks' ('checks')"""
+        )
+    }
+
+    fun testCheckKeywordsCaseInsensitive() {
+        doTest(
+            "CHECK Checks",
+            """'check' ('CHECK')
+WHITE_SPACE (' ')
+'checks' ('Checks')"""
+        )
+    }
+
+    fun testCheckIsNotPrefixMatched() {
+        doTest(
+            "checkout checked",
+            """identifier ('checkout')
+WHITE_SPACE (' ')
+identifier ('checked')"""
+        )
+    }
 }

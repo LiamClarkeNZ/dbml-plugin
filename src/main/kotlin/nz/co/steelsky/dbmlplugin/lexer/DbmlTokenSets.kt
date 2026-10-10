@@ -28,6 +28,7 @@ object DbmlTokenSets {
         DbmlTypes.TYPE, DbmlTypes.NAME, DbmlTypes.DELETE,
         DbmlTypes.UPDATE, DbmlTypes.CASCADE, DbmlTypes.RESTRICT,
         DbmlTypes.SET, DbmlTypes.NO, DbmlTypes.ACTION,
+        DbmlTypes.CHECK, DbmlTypes.CHECKS,
     )
 
     @JvmField
