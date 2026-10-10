@@ -12,6 +12,7 @@
   tokens = [
     PROJECT="PROJECT"
     TABLE="TABLE"
+    RECORDS="RECORDS"
     AS="AS"
     REF="REF"
     ENUM="ENUM"
@@ -73,9 +74,9 @@
 // Root — NEWLINE is NOT auto-skipped, so it must appear explicitly in the grammar.
 dbmlFile ::= (item_ | NEWLINE)*
 private item_ ::= (project_definition | table_definition | ref_definition | enum_definition
-                   | table_group | table_partial | named_note)
+                   | table_group | table_partial | named_note | records_definition)
                    {recoverWhile=item_recover_}
-private item_recover_ ::= !(PROJECT | TABLE | REF | ENUM | TABLEGROUP | TABLEPARTIAL | NOTE | NEWLINE | <<eof>>)
+private item_recover_ ::= !(PROJECT | TABLE | REF | ENUM | TABLEGROUP | TABLEPARTIAL | NOTE | RECORDS | NEWLINE | <<eof>>)
 
 // === Shared rules ===
 // Many keywords can appear as identifiers (column names, table names, etc.) in DBML.
@@ -104,7 +105,7 @@ table_settings ::= LBRACK table_setting (COMMA table_setting)* RBRACK {pin=1}
 table_setting ::= HEADERCOLOR COLON COLOR_CODE | NOTE COLON string_literal_
 // Order matters: indexes_definition, table_note, and table_partial_ref must be tried
 // BEFORE column_definition, because identifier_ now matches keywords like NOTE, INDEXES, etc.
-private table_body ::= (indexes_definition | table_note | table_partial_ref | column_definition | nl_)*
+private table_body ::= (indexes_definition | table_note | table_partial_ref | table_records | column_definition | nl_)*
 private table_note ::= NOTE note_value
 table_partial_ref ::= TILDE identifier_
 
@@ -185,3 +186,12 @@ named_note ::= NOTE identifier_ LBRACE string_literal_ RBRACE {pin=1}
 
 // === Note (shared) ===
 note_value ::= COLON string_literal_ | LBRACE string_literal_ RBRACE
+
+// === Records ===
+records_definition ::= RECORDS table_name records_config {pin=1}
+table_records ::= RECORDS records_config {pin=1}
+private records_config ::= (LPAREN records_column_list RPAREN)? LBRACE records_body RBRACE
+private records_column_list ::= identifier_ (COMMA identifier_)*
+private records_body ::= (records_row | nl_)*
+records_row ::= records_value (COMMA records_value?)* {pin=1}
+records_value ::= MINUS NUMBER | string_literal_ | NUMBER | EXPRESSION | NULL | identifier_ (DOT identifier_)*
