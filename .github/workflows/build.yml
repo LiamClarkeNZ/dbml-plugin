@@ -176,8 +176,26 @@ jobs:
         with:
           node-version: 20
 
+      # In pull request mode Qodana writes no results when no analysable file changed,
+      # and the action then fails reading them, so skip it for Markdown-only changes
+      - name: Check for Code Changes
+        id: changes
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          CHANGED=$(git diff --name-only "$BASE_SHA...$HEAD_SHA")
+          if grep -qv '\.md$' <<< "$CHANGED"; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Only Markdown files changed, skipping Qodana"
+          fi
+
       # Run Qodana inspections
       - name: Qodana - Code Inspection
+        if: steps.changes.outputs.code != 'false'
         uses: JetBrains/qodana-action@v2026.2.2
         with:
           cache-default-branch-only: true
