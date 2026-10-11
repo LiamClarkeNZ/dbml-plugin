@@ -1,0 +1,11 @@
+Table records {
+  id int
+  records int
+  example varchar
+}
+
+Ref: records.id > other.id
+
+Enum states {
+  records
+}

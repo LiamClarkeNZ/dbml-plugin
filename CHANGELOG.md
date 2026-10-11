@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Data sample `Records` blocks, inside or outside a table, including the `[example]` setting ([#37](https://github.com/LiamClarkeNZ/dbml-plugin/issues/37))
+
 ## [0.2.1] - 2026-10-07
 
 ### Fixed
