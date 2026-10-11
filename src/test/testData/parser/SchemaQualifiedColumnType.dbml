@@ -1,0 +1,9 @@
+Enum customer.some_enum {
+  one
+  two
+}
+
+Table customer.some_table {
+  sample customer.some_enum
+  quoted "customer"."some_enum"
+}

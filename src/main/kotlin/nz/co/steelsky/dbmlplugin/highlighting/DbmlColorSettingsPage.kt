@@ -47,7 +47,11 @@ Table users as U [headercolor: #3498db] {
   }
 
   checks {
-    `char_length(name) > 3` [name: 'chk_name_min_lenght']
+    `char_length(name) > 3` [name: 'chk_name_min_length']
+  }
+
+  records (id, name, email) {
+    0, 'user', 'user@example.com'
   }
 
   Note: '''

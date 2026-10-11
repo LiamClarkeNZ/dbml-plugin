@@ -12,6 +12,8 @@
   tokens = [
     PROJECT="PROJECT"
     TABLE="TABLE"
+    RECORDS="RECORDS"
+    EXAMPLE="EXAMPLE"
     AS="AS"
     REF="REF"
     ENUM="ENUM"
@@ -75,9 +77,9 @@
 // Root — NEWLINE is NOT auto-skipped, so it must appear explicitly in the grammar.
 dbmlFile ::= (item_ | NEWLINE)*
 private item_ ::= (project_definition | table_definition | ref_definition | enum_definition
-                   | table_group | table_partial | named_note)
+                   | table_group | table_partial | named_note | records_definition)
                    {recoverWhile=item_recover_}
-private item_recover_ ::= !(PROJECT | TABLE | REF | ENUM | TABLEGROUP | TABLEPARTIAL | NOTE | NEWLINE | <<eof>>)
+private item_recover_ ::= !(PROJECT | TABLE | REF | ENUM | TABLEGROUP | TABLEPARTIAL | NOTE | RECORDS | NEWLINE | <<eof>>)
 
 // === Shared rules ===
 // Many keywords can appear as identifiers (column names, table names, etc.) in DBML.
@@ -87,7 +89,7 @@ private identifier_ ::= LITERAL | DOUBLE_QUOTED_STRING
                        | NAME | TYPE | NOTE | DEFAULT | KEY | PK | NULL | NOT
                        | UNIQUE | INCREMENT | PRIMARY | INDEXES | BTREE | HASH
                        | DELETE | UPDATE | CASCADE | RESTRICT | SET | NO | ACTION
-                       | HEADERCOLOR | COLOR | AS | CHECK | CHECKS
+                       | HEADERCOLOR | COLOR | AS | CHECK | CHECKS | RECORDS | EXAMPLE
 table_name ::= identifier_ (DOT identifier_)?
 private string_literal_ ::= SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING | triple_quoted_string
 triple_quoted_string ::= TRIPLE_STRING_OPEN (TRIPLE_STRING_CONTENT | STRING_ESCAPE | NEWLINE)* TRIPLE_STRING_CLOSE {pin=1}
@@ -106,13 +108,13 @@ table_settings ::= LBRACK table_setting (COMMA table_setting)* RBRACK {pin=1}
 table_setting ::= HEADERCOLOR COLON COLOR_CODE | NOTE COLON string_literal_
 // Order matters: indexes_definition, table_note, and table_partial_ref must be tried
 // BEFORE column_definition, because identifier_ now matches keywords like NOTE, INDEXES, etc.
-private table_body ::= (indexes_definition | checks_definition | table_note | table_partial_ref | column_definition | nl_)*
+private table_body ::= (indexes_definition | checks_definition | table_note | table_partial_ref | table_records | column_definition | nl_)*
 private table_note ::= NOTE note_value
 table_partial_ref ::= TILDE identifier_
 
 // === Column ===
 column_definition ::= identifier_ column_datatype column_settings? {pin=1}
-column_datatype ::= identifier_ (LPAREN datatype_param (COMMA datatype_param)* RPAREN)?
+column_datatype ::= identifier_ (DOT identifier_)? (LPAREN datatype_param (COMMA datatype_param)* RPAREN)?
 private datatype_param ::= LITERAL | NUMBER
 column_settings ::= LBRACK column_setting (COMMA column_setting)* RBRACK {pin=1}
 column_setting ::= not_null_setting | null_setting | primary_key_setting | pk_setting
@@ -199,3 +201,18 @@ named_note ::= NOTE identifier_ LBRACE string_literal_ RBRACE {pin=1}
 
 // === Note (shared) ===
 note_value ::= COLON string_literal_ | LBRACE string_literal_ RBRACE
+
+// === Records ===
+// Outside a table the column list is required; inside, it defaults to every column in order.
+records_definition ::= RECORDS table_name records_columns records_settings? records_block {pin=1}
+// The lookahead lets `records int` fall through to column_definition.
+table_records ::= RECORDS &(LPAREN | LBRACK | LBRACE) records_columns? records_settings? records_block {pin=2}
+private records_columns ::= LPAREN identifier_ (COMMA identifier_)* RPAREN
+records_settings ::= LBRACK records_setting (COMMA records_setting)* RBRACK {pin=1}
+records_setting ::= EXAMPLE
+private records_block ::= LBRACE records_body RBRACE
+private records_body ::= (records_line | nl_)*
+private records_line ::= records_row (nl_ | &RBRACE) {pin=1}
+// An empty field between commas is null.
+records_row ::= records_value (COMMA records_value?)* {pin=1}
+records_value ::= MINUS NUMBER | string_literal_ | NUMBER | EXPRESSION | NULL | identifier_ (DOT identifier_)*

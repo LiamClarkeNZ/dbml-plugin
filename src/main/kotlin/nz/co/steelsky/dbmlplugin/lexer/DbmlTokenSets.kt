@@ -19,7 +19,7 @@ object DbmlTokenSets {
     @JvmField
     val KEYWORDS = TokenSet.create(
         DbmlTypes.PROJECT, DbmlTypes.TABLE, DbmlTypes.AS,
-        DbmlTypes.REF, DbmlTypes.ENUM, DbmlTypes.TABLEGROUP,
+        DbmlTypes.REF, DbmlTypes.ENUM, DbmlTypes.RECORDS, DbmlTypes.TABLEGROUP,
         DbmlTypes.TABLEPARTIAL, DbmlTypes.HEADERCOLOR, DbmlTypes.COLOR,
         DbmlTypes.NOTE, DbmlTypes.PRIMARY, DbmlTypes.KEY,
         DbmlTypes.PK, DbmlTypes.NULL, DbmlTypes.NOT,
@@ -28,7 +28,7 @@ object DbmlTokenSets {
         DbmlTypes.TYPE, DbmlTypes.NAME, DbmlTypes.DELETE,
         DbmlTypes.UPDATE, DbmlTypes.CASCADE, DbmlTypes.RESTRICT,
         DbmlTypes.SET, DbmlTypes.NO, DbmlTypes.ACTION,
-        DbmlTypes.CHECK, DbmlTypes.CHECKS,
+        DbmlTypes.CHECK, DbmlTypes.CHECKS, DbmlTypes.EXAMPLE,
     )
 
     @JvmField
