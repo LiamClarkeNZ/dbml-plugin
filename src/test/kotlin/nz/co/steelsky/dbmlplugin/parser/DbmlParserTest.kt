@@ -26,6 +26,15 @@ class DbmlParserTest : ParsingTestCase("", "dbml", DbmlParserDefinition()) {
         doTest(true)
     }
 
+    fun testNotes() {
+        doTest(true, true)
+    }
+
+    fun testNamedNoteRequiresBraces() {
+        val file = createPsiFile("test", "Note sticky: 'not valid DBML'")
+        assertTrue(PsiTreeUtil.findChildrenOfType(file, PsiErrorElement::class.java).isNotEmpty())
+    }
+
     fun testIndexes() {
         doTest(true)
     }

@@ -175,7 +175,8 @@ private index_note_setting ::= NOTE COLON string_literal_
 table_group ::= TABLEGROUP identifier_ table_group_settings? LBRACE table_group_body RBRACE {pin=1}
 table_group_settings ::= LBRACK table_group_setting (COMMA table_group_setting)* RBRACK {pin=1}
 table_group_setting ::= COLOR COLON COLOR_CODE | NOTE COLON string_literal_
-private table_group_body ::= (table_group_entry | table_group_note | nl_)*
+// table_group_note goes first: identifier_ matches NOTE, so table_group_entry would take it as a table name.
+private table_group_body ::= (table_group_note | table_group_entry | nl_)*
 table_group_entry ::= table_name
 private table_group_note ::= NOTE note_value
 
@@ -183,10 +184,12 @@ private table_group_note ::= NOTE note_value
 table_partial ::= TABLEPARTIAL identifier_ table_settings? LBRACE table_body RBRACE {pin=1}
 
 // === Named Note ===
-named_note ::= NOTE identifier_ note_value {pin=1}
+// Named (sticky) notes only take the braced form.
+named_note ::= NOTE identifier_ note_block {pin=1}
 
 // === Note (shared) ===
-note_value ::= (COLON string_literal_) | (LBRACE nl_? string_literal_ nl_? RBRACE)
+note_value ::= COLON string_literal_ | note_block
+private note_block ::= LBRACE nl_? string_literal_ nl_? RBRACE
 
 // === Records ===
 // Outside a table the column list is required; inside, it defaults to every column in order.
