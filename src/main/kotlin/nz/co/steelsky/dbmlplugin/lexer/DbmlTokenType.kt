@@ -44,6 +44,8 @@ class DbmlTokenType(debugName: String) : IElementType(debugName, DbmlLanguage) {
             "AS" to "'as'",
             "REF" to "'Ref'",
             "ENUM" to "'Enum'",
+            "RECORDS" to "'Records'",
+            "EXAMPLE" to "'example'",
             "TABLEGROUP" to "'TableGroup'",
             "TABLEPARTIAL" to "'TablePartial'",
             "HEADERCOLOR" to "'headercolor'",

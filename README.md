@@ -1,12 +1,15 @@
 # DBML
 
 ![Build](https://github.com/LiamClarkeNZ/dbml-plugin/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
+[![Version](https://img.shields.io/jetbrains/plugin/v/30905.svg)](https://plugins.jetbrains.com/plugin/30905-dbml)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/30905.svg)](https://plugins.jetbrains.com/plugin/30905-dbml)
 
 <!-- Plugin description -->
 [DBML](https://dbml.dbdiagram.io/) language support for JetBrains IDEs.
 
+- Live entity-relationship diagram preview in a split editor, updated as you type
+- Click the diagram to jump to the matching table, column, or enum in the source
+- Diagram honours DBML `headercolor` / `color` settings and follows the editor colour scheme and font
 - Syntax highlighting for keywords, strings, numbers, comments, operators, and expressions
 - Escape sequence highlighting in multi-line strings
 - Colour preview and picker for `headercolor` / `color` hex codes
@@ -17,6 +20,10 @@
 <!-- Plugin description end -->
 
 ## Screenshots
+
+### Diagram Preview
+
+![Entity-relationship diagram preview](screenshots/er-preview.png)
 
 ### Syntax Highlighting and Colour Preview
 
@@ -30,7 +37,7 @@
 
 - <kbd>Settings</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > search for **"DBML"** > <kbd>Install</kbd>
 
-- Or download from [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID) and install via
+- Or download from [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/30905-dbml) and install via
   <kbd>Settings</kbd> > <kbd>Plugins</kbd> > <kbd>Install plugin from disk...</kbd>
 
 ## Supported Constructs
@@ -39,6 +46,7 @@ Tables, columns, enums, refs, indexes, table groups, table partials, named notes
 
 ## Known Limitations
 
+- The diagram preview needs JCEF (the IDE's embedded browser). In an IDE without JCEF, the preview pane shows a notice instead.
 - In very large files, clicking a colour swatch immediately after editing may show an error. This is a platform limitation — wait a moment for the highlighting pass to complete and the swatch will work again.
 
 ## Links
