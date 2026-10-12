@@ -1,0 +1,34 @@
+Project shop {
+  Note {
+    'Project note on its own lines'
+  }
+}
+
+Table users {
+  id int [note: 'column note']
+  Note: 'inline table note'
+}
+
+Table orders {
+  id int
+  Note {
+    'This is a note of this table'
+  }
+}
+
+TableGroup sales {
+  orders
+  Note {
+    'Group note'
+  }
+}
+
+Note single_line_note {
+  'This is a single line note'
+}
+
+Note multiple_lines_note {
+'''
+  This is a multiple lines note
+'''
+}
