@@ -35,7 +35,7 @@ IntelliJ Platform plugin for DBML (Database Markup Language) support. Built from
 
 - **Build system**: Gradle (Kotlin DSL) with IntelliJ Platform Gradle Plugin v2
 - **Language**: Kotlin, JVM toolchain 21
-- **Target IDE**: IntelliJ IDEA 2025.2+ (sinceBuild = 252)
+- **Target IDE**: IntelliJ IDEA 2025.3.1+ (sinceBuild = 253.29346, the first build with the `com.intellij.modules.jcef` alias)
 - **Dependencies managed via**: Gradle version catalog (`gradle/libs.versions.toml`)
 
 ### Source Layout
