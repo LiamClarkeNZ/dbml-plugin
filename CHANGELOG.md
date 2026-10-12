@@ -9,8 +9,13 @@
 - Data sample `Records` blocks, inside or outside a table, including the `[example]` setting ([#37](https://github.com/LiamClarkeNZ/dbml-plugin/issues/37))
 - Check constraints: the column `check` setting and table-level `checks` blocks ([#33](https://github.com/LiamClarkeNZ/dbml-plugin/pull/33))
 
+### Changed
+
+- Requires IntelliJ IDEA 2025.3.1 or later, the first release with the `com.intellij.modules.jcef` dependency ID. 2025.2 users stay on 0.2.1 ([#48](https://github.com/LiamClarkeNZ/dbml-plugin/pull/48))
+
 ### Fixed
 
+- Opening a `.dbml` file in IntelliJ IDEA 2026.2 no longer throws `NoClassDefFoundError: com/intellij/ui/jcef/JBCefApp` ([#46](https://github.com/LiamClarkeNZ/dbml-plugin/issues/46))
 - `default: null` on a column no longer reports a syntax error ([#16](https://github.com/LiamClarkeNZ/dbml-plugin/pull/16))
 - Braced notes spanning several lines, such as `Note {` on its own line, now parse ([#17](https://github.com/LiamClarkeNZ/dbml-plugin/pull/17))
 - Notes inside a `TableGroup` no longer report a syntax error ([#17](https://github.com/LiamClarkeNZ/dbml-plugin/pull/17))
