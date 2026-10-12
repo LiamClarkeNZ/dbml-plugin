@@ -5,6 +5,8 @@
     <vendor url="https://github.com/LiamClarkeNZ/dbml-plugin" email="liam@steelsky.co.nz">steelsky</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <!-- JCEF moved into the bundled Web Browser (JCEF) plugin in 2026.2; this alias exists since 2025.3.1. -->
+    <depends>com.intellij.modules.jcef</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <fileType implementationClass="nz.co.steelsky.dbmlplugin.DbmlFileType"
