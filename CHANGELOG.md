@@ -7,6 +7,14 @@
 ### Added
 
 - Data sample `Records` blocks, inside or outside a table, including the `[example]` setting ([#37](https://github.com/LiamClarkeNZ/dbml-plugin/issues/37))
+- Check constraints: the column `check` setting and table-level `checks` blocks ([#33](https://github.com/LiamClarkeNZ/dbml-plugin/pull/33))
+
+### Fixed
+
+- `default: null` on a column no longer reports a syntax error ([#16](https://github.com/LiamClarkeNZ/dbml-plugin/pull/16))
+- Braced notes spanning several lines, such as `Note {` on its own line, now parse ([#17](https://github.com/LiamClarkeNZ/dbml-plugin/pull/17))
+- Notes inside a `TableGroup` no longer report a syntax error ([#17](https://github.com/LiamClarkeNZ/dbml-plugin/pull/17))
+- `indexes` can be used as a column name ([#33](https://github.com/LiamClarkeNZ/dbml-plugin/pull/33))
 
 ## [0.2.1] - 2026-10-07
 
