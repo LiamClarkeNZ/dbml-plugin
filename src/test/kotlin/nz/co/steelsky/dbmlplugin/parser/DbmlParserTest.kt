@@ -43,6 +43,10 @@ class DbmlParserTest : ParsingTestCase("", "dbml", DbmlParserDefinition()) {
         doTest(true)
     }
 
+    fun testChecks() {
+        doTest(true, true)
+    }
+
     fun testTableGroup() {
         doTest(true)
     }

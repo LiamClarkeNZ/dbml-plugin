@@ -1,0 +1,13 @@
+Table users {
+  uname varchar(255) [check: `char_length(uname) > 3`]
+  age integer [not null, check: `age >= 0`]
+  check varchar(255)
+  checks integer
+  indexes integer
+
+  checks {
+    `char_length(uname) > 5` [name: 'chk_uname_minlength']
+    `age >= 0`
+    `age < 150` [name: 'chk_age_max', note: 'Sanity bound']
+  }
+}
