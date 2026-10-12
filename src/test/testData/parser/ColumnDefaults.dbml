@@ -1,0 +1,8 @@
+Table t {
+  a varchar [default: null]
+  b varchar [null, default: NULL]
+  c boolean [default: true]
+  d int [default: 42]
+  e varchar [default: 'x']
+  f timestamp [default: `now()`]
+}

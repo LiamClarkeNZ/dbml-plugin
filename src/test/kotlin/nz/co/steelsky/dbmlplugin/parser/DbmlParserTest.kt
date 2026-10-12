@@ -10,6 +10,10 @@ class DbmlParserTest : ParsingTestCase("", "dbml", DbmlParserDefinition()) {
         doTest(true)
     }
 
+    fun testColumnDefaults() {
+        doTest(true, true)
+    }
+
     fun testTableWithSettings() {
         doTest(true)
     }
