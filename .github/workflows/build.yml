@@ -52,7 +52,7 @@ jobs:
 
       # Set up Node for the visualisation webview build
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 20
 
@@ -109,7 +109,7 @@ jobs:
 
       # Set up Node for the visualisation webview build
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 20
 
@@ -172,7 +172,7 @@ jobs:
 
       # Set up Node for the visualisation webview build
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 20
 
@@ -227,7 +227,7 @@ jobs:
 
       # Set up Node for the visualisation webview build
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 20
 
