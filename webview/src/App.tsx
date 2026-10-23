@@ -1,8 +1,10 @@
 import {
+  applyNodeChanges,
   Background,
   ControlButton,
   Controls,
   MiniMap,
+  type NodeChange,
   ReactFlow,
   ReactFlowProvider,
   useReactFlow,
@@ -90,6 +92,10 @@ function Diagram() {
     banner: null,
   });
   const lastHash = useRef<string | null>(null);
+  // Set when a structural change was laid out from estimated sizes. Once React Flow has measured
+  // every node, the effect below lays the diagram out again from the real sizes. `fit` re-fits
+  // the viewport only for the first diagram, so later edits keep the user's pan and zoom.
+  const pendingLayout = useRef<{ fit: boolean } | null>(null);
   const groupsRef = useRef<SchemaModel["groups"]>([]);
   const schemaRef = useRef<SchemaModel | null>(null);
   const [highlight, setHighlight] = useState<Highlight>(EMPTY_HIGHLIGHT);
@@ -132,6 +138,7 @@ function Diagram() {
       }
 
       const positioned = await layout(nodes, styledEdges, schema.groups);
+      pendingLayout.current = { fit: lastHash.current === null };
       lastHash.current = hash;
       setState({
         nodes: positioned,
@@ -181,6 +188,33 @@ function Diagram() {
 
   const clearHighlight = useCallback(() => setHighlight(EMPTY_HIGHLIGHT), []);
   const { zoomIn, zoomOut, fitView } = useReactFlow();
+
+  // Applies drags, selection and the measured dimensions React Flow reports. Hulls follow the
+  // nodes. Dragged positions last until the next structural change re-runs the layout.
+  const onNodesChange = useCallback((changes: NodeChange<FlowNode>[]) => {
+    setState((s) => {
+      const nodes = applyNodeChanges(changes, s.nodes);
+      return { ...s, nodes, hulls: computeHulls(groupsRef.current, nodes) };
+    });
+  }, []);
+
+  useEffect(() => {
+    const pending = pendingLayout.current;
+    if (!pending || !state.nodes.every((n) => n.measured?.width && n.measured?.height)) return;
+    pendingLayout.current = null;
+    const hash = lastHash.current;
+    layout(state.nodes, state.edges, groupsRef.current)
+      .then((positioned) => {
+        if (lastHash.current !== hash) return; // a newer structural change owns the layout now
+        setState((s) => ({
+          ...s,
+          nodes: positioned,
+          hulls: computeHulls(groupsRef.current, positioned),
+        }));
+        if (pending.fit) requestAnimationFrame(() => void fitView());
+      })
+      .catch((e) => setState((s) => ({ ...s, banner: `Render error: ${String(e)}` })));
+  }, [state.nodes, state.edges, fitView]);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -241,6 +275,7 @@ function Diagram() {
           edges={edges}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
+          onNodesChange={onNodesChange}
           onEdgeClick={onEdgeClick}
           onPaneClick={clearHighlight}
           zoomOnScroll={false}

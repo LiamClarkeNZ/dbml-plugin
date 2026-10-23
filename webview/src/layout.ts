@@ -1,21 +1,25 @@
 import ELK, { type ElkNode } from "elkjs/lib/elk.bundled.js";
-import { HULL_PAD, HULL_PAD_TOP } from "./groups/hulls";
+import {
+  ENUM_HEADER_HEIGHT,
+  ENUM_ROW_HEIGHT,
+  HULL_PAD,
+  HULL_PAD_TOP,
+  LAYER_SPACING,
+  NODE_SPACING,
+  NODE_VERTICAL_PADDING,
+  NODE_WIDTH,
+  TABLE_HEADER_HEIGHT,
+  TABLE_ROW_HEIGHT,
+} from "./dimensions";
 import type { GroupModel } from "./schema";
 import type { FlowEdge, FlowNode } from "./transform";
 import { tableNodeId } from "./transform";
 
 const elk = new ELK();
 
-const NODE_WIDTH = 240;
-const TABLE_HEADER = 36;
-const TABLE_ROW = 24;
-const ENUM_HEADER = 28;
-const ENUM_ROW = 22;
-const PADDING = 12;
-
 // Padding for a synthetic group parent node, expressed in ELK's own padding syntax. Kept equal
 // to what GroupHulls actually draws (HULL_PAD / HULL_PAD_TOP) so the ELK-derived group box and
-// the hull drawn around it agree; see hulls.ts for why the top gets extra room.
+// the hull drawn around it agree; see dimensions.ts for why the top gets extra room.
 const GROUP_PADDING = `[top=${HULL_PAD_TOP}.0,left=${HULL_PAD}.0,right=${HULL_PAD}.0,bottom=${HULL_PAD}.0]`;
 
 /** Id of the synthetic ELK parent node standing in for the group at this index. Prefixed so it
@@ -27,10 +31,19 @@ export function estimateSize(node: FlowNode): { width: number; height: number } 
     const t = node.data.table;
     const indexRows = t.indexes.length > 0 ? t.indexes.length + 1 : 0; // +1 divider
     const rows = t.columns.length + indexRows;
-    return { width: NODE_WIDTH, height: TABLE_HEADER + rows * TABLE_ROW + PADDING };
+    return { width: NODE_WIDTH, height: TABLE_HEADER_HEIGHT + rows * TABLE_ROW_HEIGHT + NODE_VERTICAL_PADDING };
   }
   const values = node.data.enum.values.length;
-  return { width: NODE_WIDTH, height: ENUM_HEADER + values * ENUM_ROW + PADDING };
+  return { width: NODE_WIDTH, height: ENUM_HEADER_HEIGHT + values * ENUM_ROW_HEIGHT + NODE_VERTICAL_PADDING };
+}
+
+/** The node's rendered size once React Flow has measured it, else an explicit width/height, else
+ * the estimate. Estimates drift from the CSS (padding, wrapped index rows), so a layout from them
+ * can overlap nodes; App runs a second layout once every node is measured. */
+export function nodeSize(node: FlowNode): { width: number; height: number } {
+  const width = node.measured?.width ?? node.width;
+  const height = node.measured?.height ?? node.height;
+  return width && height ? { width, height } : estimateSize(node);
 }
 
 /**
@@ -69,7 +82,7 @@ export async function layout(
   edges: FlowEdge[],
   groups: GroupModel[] = [],
 ): Promise<FlowNode[]> {
-  const sizes = new Map(nodes.map((n) => [n.id, estimateSize(n)]));
+  const sizes = new Map(nodes.map((n) => [n.id, nodeSize(n)]));
   const nodeIds = new Set(nodes.map((n) => n.id));
 
   // DBML does not forbid listing a table in more than one TableGroup, but an ELK node can only
@@ -120,8 +133,8 @@ export async function layout(
       // group entirely. This tells ELK Layered to route across the hierarchy instead of
       // treating each parent as an isolated sub-layout (which throws on cross-level edges).
       "elk.hierarchyHandling": "INCLUDE_CHILDREN",
-      "elk.layered.spacing.nodeNodeBetweenLayers": "90",
-      "elk.spacing.nodeNode": "50",
+      "elk.layered.spacing.nodeNodeBetweenLayers": String(LAYER_SPACING),
+      "elk.spacing.nodeNode": String(NODE_SPACING),
       "elk.layered.considerModelOrder.strategy": "NODES_AND_EDGES",
     },
     children: [...groupParents, ...rootChildren],
@@ -135,14 +148,7 @@ export async function layout(
   const result = await elk.layout(graph);
   const positions = absolutePositions(result.children ?? [], groupParentIds);
 
-  return nodes.map((n) => {
-    const size = sizes.get(n.id)!;
-    return {
-      ...n,
-      position: positions.get(n.id) ?? { x: 0, y: 0 },
-      width: size.width,
-      height: size.height,
-      style: { width: size.width },
-    };
-  });
+  // No width/height on the node: React Flow would pin the wrapper to them and measure that pinned
+  // box instead of the content. The node's own CSS sets its width.
+  return nodes.map((n) => ({ ...n, position: positions.get(n.id) ?? { x: 0, y: 0 } }));
 }

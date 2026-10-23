@@ -1,3 +1,5 @@
+import { HULL_PAD, HULL_PAD_TOP } from "../dimensions";
+import { nodeSize } from "../layout";
 import type { GroupModel } from "../schema";
 import type { FlowNode } from "../transform";
 import { tableNodeId } from "../transform";
@@ -10,14 +12,6 @@ export interface Hull {
   width: number;
   height: number;
 }
-
-/** Side/bottom padding around a group's member nodes. Shared with layout.ts so the ELK
- * parent node sizing (`elk.padding`) stays consistent with what the hull actually draws. */
-export const HULL_PAD = 28;
-/** The label chip sits inside the hull, so the top needs a band of its own: enough for the chip
- * plus clear space, otherwise the chip reads as sitting on top of the first table. Shared with
- * layout.ts for the same reason as HULL_PAD. */
-export const HULL_PAD_TOP = 48;
 
 export function computeHulls(
   groups: GroupModel[],
@@ -39,8 +33,7 @@ export function computeHulls(
     let maxX = -Infinity;
     let maxY = -Infinity;
     for (const m of members) {
-      const w = m.width ?? 240;
-      const h = m.height ?? 80;
+      const { width: w, height: h } = nodeSize(m);
       minX = Math.min(minX, m.position.x);
       minY = Math.min(minY, m.position.y);
       maxX = Math.max(maxX, m.position.x + w);
