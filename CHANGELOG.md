@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- Tables and enums in the diagram can be dragged to rearrange them; group outlines follow. Positions reset on the next structural edit or when the file is reopened
+
+### Fixed
+
+- Tables no longer overlap in the diagram: the layout runs again once the real node sizes are known
+
 ## [0.3.0] - 2026-10-12
 
 ### Added

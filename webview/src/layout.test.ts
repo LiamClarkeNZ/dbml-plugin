@@ -1,7 +1,7 @@
 import type { ElkNode } from "elkjs/lib/elk.bundled.js";
 import { describe, expect, it } from "vitest";
 import sample from "./fixtures/sample-schema.json";
-import { absolutePositions, layout } from "./layout";
+import { absolutePositions, layout, nodeSize } from "./layout";
 import type {
   ColumnModel,
   EnumModel,
@@ -32,6 +32,27 @@ describe("layout", () => {
     const byId = new Map(positioned.map((n) => [n.id, n]));
     // relation edge is source=posts -> target=users, so posts sits left of users
     expect(byId.get("posts")!.position.x).toBeLessThan(byId.get("users")!.position.x);
+  });
+});
+
+describe("measured layout", () => {
+  it("spaces nodes by their measured size, not the estimate", async () => {
+    const { nodes, edges } = toFlow(sample as SchemaModel);
+    // Far taller than any estimate: a layout from estimates would stack these on top of each other.
+    const measured = nodes.map((n) => ({ ...n, measured: { width: 300, height: 900 } }));
+    const positioned = await layout(measured, edges, (sample as SchemaModel).groups);
+
+    for (const a of positioned) {
+      for (const b of positioned) {
+        if (a === b) continue;
+        const apart =
+          a.position.x + 300 <= b.position.x ||
+          b.position.x + 300 <= a.position.x ||
+          a.position.y + 900 <= b.position.y ||
+          b.position.y + 900 <= a.position.y;
+        expect(apart, `${a.id} overlaps ${b.id}`).toBe(true);
+      }
+    }
   });
 });
 
@@ -130,8 +151,7 @@ function boundingBox(
   for (const key of keys) {
     const n = byId.get(tableNodeId(key));
     if (!n) continue;
-    const w = n.width ?? 0;
-    const h = n.height ?? 0;
+    const { width: w, height: h } = nodeSize(n);
     minX = Math.min(minX, n.position.x);
     minY = Math.min(minY, n.position.y);
     maxX = Math.max(maxX, n.position.x + w);
