@@ -196,7 +196,7 @@ jobs:
       # Run Qodana inspections
       - name: Qodana - Code Inspection
         if: steps.changes.outputs.code != 'false'
-        uses: JetBrains/qodana-action@v2026.2.2
+        uses: JetBrains/qodana-action@v2026.3.1
         with:
           cache-default-branch-only: true
 
